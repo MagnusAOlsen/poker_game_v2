@@ -267,8 +267,9 @@ public checkIfAllPlayersRevealed(): void {
             break;
           case 'river':
             this.phase = 'showdown';
-            case 'showdown':
-                break;
+            break;
+          case 'showdown':
+              break;
         }
     }
 }

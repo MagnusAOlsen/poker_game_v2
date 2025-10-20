@@ -3,6 +3,9 @@ import http from 'http';
 import { Player } from "./gameLogic/Player.ts";
 import { Game } from "./gameLogic/Game.ts";
 import ip from 'ip';
+import { connectDB } from './database/connection.ts';
+import { GameStats } from "./database/GameStats.ts";
+
 
 async function broadcast(wss: WebSocketServer, message: any) {
   const msg = JSON.stringify(message);
@@ -55,20 +58,38 @@ async function playRound(game: Game, wss: WebSocketServer, clients: Map<WebSocke
   game.payOut(rankings)  
     
 }
+
+async function updateGameStats(playerCount: number) {
+  const stats = await GameStats.findOne();
+
+  if (!stats) {
+    // Create first record
+    await GameStats.create({
+      gamesPlayed: 1,
+      averagePlayersPerGame: playerCount
+    });
+  } else {
+    // Update existing record
+    const newGamesPlayed = stats.gamesPlayed + 1;
+    const newAverage = ((stats.averagePlayersPerGame * stats.gamesPlayed) + playerCount) / newGamesPlayed;
+
+    stats.gamesPlayed = newGamesPlayed;
+    stats.averagePlayersPerGame = newAverage;
+    await stats.save();
+  }
+}
   
 
-  
-
-function main() {
+async function main() {
   const server = http.createServer();
   const wss = new WebSocketServer({ server });
-
   const players: Player[] = [];
   const clients = new Map();
   let game: Game | null = null;
+  await connectDB();
 
-  wss.on('connection', (socket) => {
-    socket.on('message', (msg) => {
+  wss.on('connection', async (socket) => {
+    socket.on('message', async (msg) => {
       const data = JSON.parse(msg.toString());
       const playerName = clients.get(socket);
       const player = players.find(p => p.name === playerName);
@@ -86,12 +107,13 @@ function main() {
 
         case 'startGame': {
           
+          await updateGameStats(players.length);
           const loopRounds = async () => {
             let dealerPosition = 0;
             while (true) {
               const playersWithCash = players.filter(p => p.chips > 0);
               if (playersWithCash.length < 2) break;
-          
+              
               broadcast(wss, { type: 'gameStarted' });
               broadcast(wss, { type: 'players', players });
               
@@ -214,6 +236,7 @@ function main() {
             broadcast(wss, { type: 'communityCards', cards: game.getCommunityCards(), potSize: game.getPot() });
             game.checkIfAllPlayersRevealed(); 
           }
+          break;
         }
 
         case 'addOn': {
