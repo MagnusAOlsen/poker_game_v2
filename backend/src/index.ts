@@ -1,10 +1,10 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import http from 'http';
-import { Player } from "./gameLogic/Player.ts";
-import { Game } from "./gameLogic/Game.ts";
+import { Player } from "./gameLogic/Player.js";
+import { Game } from "./gameLogic/Game.js";
 import ip from 'ip';
-import { connectDB } from './database/connection.ts';
-import { GameStats } from "./database/GameStats.ts";
+import { connectDB } from './database/connection.js';
+import { GameStats } from "./database/GameStats.js";
 
 
 async function broadcast(wss: WebSocketServer, message: any) {
