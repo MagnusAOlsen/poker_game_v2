@@ -1,8 +1,8 @@
-import { Deck } from './Deck.js';
-import { Player } from './Player.js';
-import { Card } from './Card.js';
-import { HandEvaluator } from './HandEvaluator.js';
-import type { EvaluatedHand } from './HandEvaluator.js';
+import { Deck } from './Deck.ts';
+import { Player } from './Player.ts';
+import { Card } from './Card.ts';
+import { HandEvaluator } from './HandEvaluator.ts';
+import type { EvaluatedHand } from './HandEvaluator.ts';
 
 export type GamePhase = 'pre-flop' | 'flop' | 'turn' | 'river' | 'showdown';
 export type Ranking = {

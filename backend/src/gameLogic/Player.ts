@@ -1,5 +1,5 @@
 /* import * as readline from 'readline'; */
-import { Card } from './Card.js';
+import { Card } from './Card.ts';
 
 
 //Used to check the game logic in terminal

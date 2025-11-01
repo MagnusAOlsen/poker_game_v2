@@ -1,10 +1,10 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import http from 'http';
-import { Player } from "./gameLogic/Player.js";
-import { Game } from "./gameLogic/Game.js";
+import { Player } from "./gameLogic/Player.ts";
+import { Game } from "./gameLogic/Game.ts";
 import ip from 'ip';
-import { connectDB } from './database/connection.js';
-import { GameStats } from "./database/GameStats.js";
+import { connectDB } from './database/connection.ts';
+import { GameStats } from "./database/GameStats.ts";
 
 
 async function broadcast(wss: WebSocketServer, message: any) {
@@ -272,7 +272,7 @@ async function main() {
   const port = 3000;
   const url = `http://${localIP}:${port}/PlayerLogin`;
 
-  server.listen(port, () => {
+  server.listen(port, "0.0.0.0", () => {
     console.log(`Server listening on ${url}`);
   });
 }
