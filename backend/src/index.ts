@@ -86,6 +86,7 @@ async function main() {
   const players: Player[] = [];
   const clients = new Map();
   let game: Game | null = null;
+  const sessions = new Map();
   await connectDB();
 
   wss.on('connection', async (socket) => {
@@ -95,6 +96,21 @@ async function main() {
       const player = players.find(p => p.name === playerName);
 
       switch (data.type) {
+        case 'createCode': {
+          const code = Math.random().toString(36).substring(2, 8).toUpperCase(); 
+          socket.send(JSON.stringify({ type: 'gameCode', code })); 
+          console.log("created code:" + code);
+          break;
+        }
+
+        case'reconnectHost': {
+          const gameCode = data.code;
+          /* Make a dictionary with the game code as key and players as value */
+          socket.send(JSON.stringify({ type: 'gameCode', code: gameCode }));
+          socket.send(JSON.stringify({ type: 'players', players }));
+          break;
+        }
+
         case 'join': {
           if (!players.find(p => p.name === data.name) && players.length < 7) {
             const newPlayer = new Player(data.name);

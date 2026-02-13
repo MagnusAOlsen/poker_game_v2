@@ -19,20 +19,39 @@ function HostWaiting() {
     }
   });
 
+  const [gameCode, setGameCode] = useState<string>(() => {
+    return sessionStorage.getItem("gameCode") || "...";
+  });
+
   const { language } = useLanguage();
 
   const socketRef = useRef<WebSocket | null>(null);
+  const hasRequestedCode = useRef(false);
 
   useEffect(() => {
     sessionStorage.setItem("currentPlayers", JSON.stringify(currentPlayers));
-    const socket = new WebSocket("ws://172.24.10.57:3000"); //Must change every time the server IP changes
+    const socket = new WebSocket("ws://192.168.1.63:3000"); //Must change every time the server IP changes
     socketRef.current = socket;
+
+    socket.onopen = () => {
+      const savedCode = sessionStorage.getItem("gameCode");
+
+      if (savedCode) {
+        socket.send(JSON.stringify({ type: "reconnectHost", code: savedCode }));
+      } else if (!hasRequestedCode.current) {
+        socket.send(JSON.stringify({ type: "createCode" }));
+        hasRequestedCode.current = true;
+      }
+    };
 
     socket.onmessage = (msg) => {
       const data = JSON.parse(msg.data);
       if (data.type === "players") {
         setCurrentPlayers(data.players);
         sessionStorage.setItem("currentPlayers", JSON.stringify(data.players));
+      } else if (data.type === "gameCode") {
+        setGameCode(data.code);
+        sessionStorage.setItem("gameCode", data.code);
       }
     };
 
@@ -52,7 +71,7 @@ function HostWaiting() {
         style={{ position: "relative", height: "100vh", overflow: "hidden" }}
       >
         <PokerBackground />
-        <LoginField currentPlayers={currentPlayers} />
+        <LoginField currentPlayers={currentPlayers} gameCode={gameCode} />
         <div className="player-list">
           {language === "en" ? <h2>Current Players</h2> : <h2>Spillere</h2>}
 

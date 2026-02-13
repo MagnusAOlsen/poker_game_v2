@@ -5,18 +5,24 @@ import { useLanguage } from "../context/LanguageContext";
 
 type LoginFieldProps = {
   currentPlayers: Player[];
+  gameCode: string;
 };
 
-function LoginField({ currentPlayers }: LoginFieldProps) {
+function LoginField({ currentPlayers, gameCode }: LoginFieldProps) {
   const { language } = useLanguage();
 
   return (
     <>
       <div className="login-field">
         {language === "en" ? (
-          <h1>Scan QR-code to join!</h1>
+          <h1>
+            Scan QR-code to join or use the game code! Game code: {gameCode}
+          </h1>
         ) : (
-          <h1>Les QR-koden for å bli med!</h1>
+          <h1>
+            Skann QR-koden for å bli med eller bruk spillkoden! Spillkode:{" "}
+            {gameCode}
+          </h1>
         )}
         <img src="/qr-code.png" alt="QR Code" />
         {language === "en" ? <h2>Current Players:</h2> : <h2>Spillere:</h2>}

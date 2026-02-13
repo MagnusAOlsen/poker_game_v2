@@ -5,6 +5,8 @@ import PlayerPlaying from "./pages/PlayerPlaying";
 import PlayerLogin from "./pages/PlayerLogin";
 import { MusicProvider } from "./context/MusicContext";
 import { LanguageProvider } from "./context/LanguageContext";
+import WelcomePage from "./pages/welcomePage";
+import JoinGame from "./pages/JoinGame";
 
 function App() {
   return (
@@ -16,6 +18,8 @@ function App() {
             <Route path="/HostWaiting" element={<HostWaiting />} />
             <Route path="/PlayerPlaying" element={<PlayerPlaying />} />
             <Route path="/PlayerLogin" element={<PlayerLogin />} />
+            <Route path="/JoinGame" element={<JoinGame />} />
+            <Route path="/WelcomePage" element={<WelcomePage />} />
           </Routes>
         </Router>
       </MusicProvider>
