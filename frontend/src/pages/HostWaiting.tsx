@@ -60,7 +60,9 @@ function HostWaiting() {
 
   const startGame = () => {
     if (socketRef.current) {
-      socketRef.current.send(JSON.stringify({ type: "startGame" }));
+      socketRef.current.send(
+        JSON.stringify({ type: "startGame", gameCode: gameCode })
+      );
     }
   };
 

@@ -33,12 +33,18 @@ function PlayerPlaying() {
     const socket = new WebSocket("ws://192.168.1.63:3000");
     socketRef.current = socket;
 
-    const playerName = sessionStorage.getItem("currentPlayer");
-    playerNameRef.current = playerName;
-
     socket.onopen = () => {
+      const playerName = sessionStorage.getItem("currentPlayer");
+      playerNameRef.current = playerName;
+      const gameCode = sessionStorage.getItem("gameCode");
       if (playerName) {
-        socket.send(JSON.stringify({ type: "reconnect", name: playerName }));
+        socket.send(
+          JSON.stringify({
+            type: "reconnect",
+            name: playerName,
+            gameCode: gameCode,
+          })
+        );
       }
     };
 

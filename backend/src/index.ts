@@ -6,58 +6,77 @@ import ip from 'ip';
 import { connectDB } from './database/connection.ts';
 import { GameStats } from "./database/GameStats.ts";
 
+interface Session {
+  host: WebSocket;
+  players: Player[];
+  clients: Map<WebSocket, string>;
+  game: Game | null;
+}
 
-async function broadcast(wss: WebSocketServer, message: any) {
+async function broadcast(session: Session, message: any) {
   const msg = JSON.stringify(message);
-  wss.clients.forEach(client => {
-    if (client.readyState === client.OPEN) {
+  if (session.host.readyState === WebSocket.OPEN) {
+    session.host.send(msg);
+  }
+  session.clients.forEach((name, client) => {
+    if (client.readyState === WebSocket.OPEN) {
       client.send(msg);
-    }
+    };
   });
 }
 
-async function playRound(game: Game, wss: WebSocketServer, clients: Map<WebSocket, string>, dealerPosition: number) {
-  broadcast(wss, { type: 'shuffling'});
+async function playRound(session: Session, dealerPosition: number) {
+  const game = session.game;
+  broadcast(session, { type: 'shuffling'});
   await new Promise(resolve => setTimeout(resolve, 2000));
+  if (game && session.clients) {
   game.startNewRound(dealerPosition);
-  broadcast(wss, { type: 'players', players: game.players });
-  for (const [socket, name] of clients.entries()) {
-    const player = game.players.find(p => p.name === name);
+  broadcast(session, { type: 'players', players: game.players });
+  session.clients.forEach((playerName, socket) => {
+    const player = game.players.find(p => p.name === playerName);
     if (player && socket.readyState === WebSocket.OPEN) {
-      socket.send(JSON.stringify({ type: 'player', player }));
+      socket.send(JSON.stringify({ 
+        type: 'player', 
+        player: player, // Contains Hand
+        isMyTurn: game.currentPlayer?.name === player.name 
+      }));
     }
-  }
+  });
+
   
-  broadcast(wss, { type: "communityCards", cards: game.getCommunityCards(), potSize: game.getPot() });
+  broadcast(session, { type: "communityCards", cards: game.getCommunityCards(), potSize: game.getPot() });
 
   for (const player of game.players) {
-    player.notifyTurn = (playerName) => {
-      const socket = [...clients.entries()].find(([_, name]) => name === playerName)?.[0];
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({ type: 'yourTurn' }));
+    player.notifyTurn = (activePlayerName) => {
+      for (const [socket, name] of session.clients.entries()) {
+        if (name === activePlayerName && socket.readyState === WebSocket.OPEN) {
+           socket.send(JSON.stringify({ type: 'yourTurn' }));
+           break; 
+        }
       }
     };
   }
 
   for (let i = 0; i < 4; i++) {
     await game.collectBets();
-    broadcast(wss, { type: "players", players: game.players });
+    broadcast(session, { type: "players", players: game.players });
     game.nextPhase();
-    broadcast(wss, { type: "communityCards", cards: game.getCommunityCards(), potSize: game.getPot() });
+    broadcast(session, { type: "communityCards", cards: game.getCommunityCards(), potSize: game.getPot() });
   }
 
   const rankings = game.rankPlayers();
 
-  for (const [socket, name] of clients.entries()) {
+  for (const [socket, name] of session.clients.entries()) {
     const player = game.players.find(p => p.name === name);
     if (player && !player.hasFolded && player.hand.length > 0 && socket.readyState === WebSocket.OPEN) {
       socket.send(JSON.stringify({ type: 'showFoldedCards'}));
     }
   }
   await game.waitForAllPlayersToReveal();
-  game.payOut(rankings)  
+  game.payOut(rankings)
+  broadcast(session, { type: 'players', players: game.players });  
     
-}
+}};
 
 async function updateGameStats(playerCount: number) {
   const stats = await GameStats.findOne();
@@ -83,65 +102,105 @@ async function updateGameStats(playerCount: number) {
 async function main() {
   const server = http.createServer();
   const wss = new WebSocketServer({ server });
-  const players: Player[] = [];
-  const clients = new Map();
-  let game: Game | null = null;
-  const sessions = new Map();
   await connectDB();
+  const sessions = new Map<string, Session>();
+  const socketToGameCode = new Map<WebSocket, string>();
 
   wss.on('connection', async (socket) => {
+
+    socket.on('close', () => {
+      const code = socketToGameCode.get(socket);
+      socketToGameCode.delete(socket);
+      if (!code) return;
+      const session = sessions.get(code);
+      if (!session) return;
+      session.clients.delete(socket);
+    });
+
     socket.on('message', async (msg) => {
       const data = JSON.parse(msg.toString());
-      const playerName = clients.get(socket);
-      const player = players.find(p => p.name === playerName);
+      const gameCode = socketToGameCode.get(socket);
+      let session: Session | undefined;
+      if (gameCode) {
+        session = sessions.get(gameCode);
+      }
+      let player: Player | undefined;
+      if (session) {
+        const playerName = session.clients.get(socket);
+        player = session.players.find(p => p.name === playerName);
+      }
 
       switch (data.type) {
         case 'createCode': {
           const code = Math.random().toString(36).substring(2, 8).toUpperCase(); 
+          const newSession: Session = {
+            host: socket,
+            players: [],
+            clients: new Map(),
+            game: null
+          };
+          sessions.set(code, newSession);
+          socketToGameCode.set(socket, code);
           socket.send(JSON.stringify({ type: 'gameCode', code })); 
-          console.log("created code:" + code);
           break;
         }
 
         case'reconnectHost': {
           const gameCode = data.code;
-          /* Make a dictionary with the game code as key and players as value */
-          socket.send(JSON.stringify({ type: 'gameCode', code: gameCode }));
-          socket.send(JSON.stringify({ type: 'players', players }));
+          const session = sessions.get(gameCode);
+          if (session && gameCode) {
+            session.host = socket;
+            socketToGameCode.set(socket, gameCode);
+            socket.send(JSON.stringify({ type: 'gameCode', code: gameCode }));
+            socket.send(JSON.stringify({ type: 'players', players: session.players }));
+            socket.send(JSON.stringify({ type: 'players', players: session.players }));
+          }
           break;
         }
 
         case 'join': {
-          if (!players.find(p => p.name === data.name) && players.length < 7) {
-            const newPlayer = new Player(data.name);
-            players.push(newPlayer);
+          const newGameCode = data.gameCode;
+          const session = sessions.get(newGameCode);
+
+          if (session && newGameCode) {
+            if (!session.players.find(p => p.name === data.name) && session.players.length < 7) {
+              const newPlayer = new Player(data.name);
+              session.players.push(newPlayer);
+              session.clients.set(socket, data.name);
+              socketToGameCode.set(socket, newGameCode);
           }
-          clients.set(socket, data.name);
-          broadcast(wss, { type: 'players', players });
+          session.clients.set(socket, data.name)
+          broadcast(session, { type: "players", players: session.players });
+          }
           break;
         }
 
         case 'startGame': {
-          
-          await updateGameStats(players.length);
+          if (session && gameCode) {
+          await updateGameStats(session.players.length);
+          ;
           const loopRounds = async () => {
             let dealerPosition = 0;
             while (true) {
-              const playersWithCash = players.filter(p => p.chips > 0);
+              const playersWithCash = session.players.filter(p => p.chips > 0);
               if (playersWithCash.length < 2) break;
               
-              broadcast(wss, { type: 'gameStarted' });
-              broadcast(wss, { type: 'players', players });
+              broadcast(session, { type: 'gameStarted' });
+              broadcast(session, { type: 'players', players: session.players });
               
-              game = new Game(players);
-              await playRound(game, wss, clients, dealerPosition);
+              const game = new Game(session.players);
+              session.game = game;
+              await playRound(session, dealerPosition);
           
               await new Promise(resolve => setTimeout(resolve, 3000));
 
-              for (const player of players) {
+              for (const player of session.players) {
                 if (player.leave) {
-                  players.splice(players.indexOf(player), 1);
-                  clients.delete([...clients.entries()].find(([_, name]) => name === player.name)?.[0]);
+                  session.players.splice(session.players.indexOf(player), 1);
+                  const socketToDelete = [...session.clients.entries()].find(([_, name]) => name === player.name)?.[0];
+                  if (socketToDelete) {
+                    session.clients.delete(socketToDelete);
+                  }
                 }
                 else if (player.addOn) {
                   player.chips = 150;
@@ -151,106 +210,113 @@ async function main() {
           
               // Rotate dealer only to active players
               do {
-                dealerPosition = (dealerPosition + 1) % players.length;
-              } while (players[dealerPosition].chips === 0);
+                dealerPosition = (dealerPosition + 1) % session.players.length;
+              } while (session.players[dealerPosition].chips === 0);
             }
           };
           
           loopRounds();
+        }
           break;
         }
 
         //Reconnect players after every move so the amount of chips is always correct
         case 'reconnect': {
           const reconnectingName = data.name;
-          const reconnectingPlayer = players.find(p => p.name === reconnectingName);
+          const newGameCode = data.gameCode;
+          const session = sessions.get(newGameCode);
+          if (session && newGameCode) {
+          const reconnectingPlayer = session.players.find(p => p.name === reconnectingName);
           if (reconnectingPlayer) {
-            for (const [sock, name] of clients.entries()) {
+            for (const [sock, name] of session.clients.entries()) {
               if (name === data.name && sock !== socket) {
-                clients.delete(sock);
+                session.clients.delete(sock);
                 sock.close();
               }
             }
-            clients.set(socket, data.name);
-            socket.send(JSON.stringify({ type: 'player', player: reconnectingPlayer, isMyTurn: game?.currentPlayer?.name === reconnectingName }));
+            session.clients.set(socket, data.name);
+            socketToGameCode.set(socket, newGameCode);
+            socket.send(JSON.stringify({ type: 'player', player: reconnectingPlayer, isMyTurn: session.game?.currentPlayer?.name === reconnectingName }));
+            
           }
+        }
           break;
         }
 
         case 'raise': {
-          if (player) {
+          if (player && session) {
             player.respondToBet(data.amount);
               socket.send(JSON.stringify({ type: 'player', player }));
-              broadcast(wss, { type: 'players', players: players });
+              broadcast(session, { type: 'players', players: session.players });
           }
           break;
         }
 
         case 'call': {
-          if (player) {
+          if (player && session && gameCode) {
             player.called = true;
             player.respondToBet(-1);
               socket.send(JSON.stringify({ type: 'player', player }));
-              broadcast(wss, { type: 'players', players: players });
+              broadcast(session, { type: 'players', players: session.players });
            
           }
           break;
         }
 
         case 'fold': {
-          if (player) {
+          if (player && session && gameCode) {
             player.respondToBet(-2);
             socket.send(JSON.stringify({ type: 'player', player }));
-            broadcast(wss, { type: 'players', players: players });
+            broadcast(session, { type: 'players', players: session.players });
             
           }
           break;
         }
 
         case 'showLeftCard': {
-          if (player && game) {
+          if (player && session && session.game) {
             player.showLeftCard = true;
             player.showRightCard = false;
             player.showBothCards = false;
-            broadcast(wss, { type: 'players', players });
-            broadcast(wss, { type: 'communityCards', cards: game.getCommunityCards() , potSize: game.getPot()});
-            game.checkIfAllPlayersRevealed();
+            broadcast(session, { type: 'players', players: session.players });
+            broadcast(session, { type: 'communityCards', cards: session.game.getCommunityCards() , potSize: session.game.getPot()});
+            session.game.checkIfAllPlayersRevealed();
           }
           break;
         }
         
         case 'showRightCard': {
-          if (player && game) {
+          if (player && session && session.game) {
             player.showLeftCard = false;
             player.showRightCard = true;
             player.showBothCards = false;
-            broadcast(wss, { type: 'players', players });
-            broadcast(wss, { type: 'communityCards', cards: game.getCommunityCards(), potSize: game.getPot() });
-            game.checkIfAllPlayersRevealed(); 
+            broadcast(session, { type: 'players', players: session.players });
+            broadcast(session, { type: 'communityCards', cards: session.game.getCommunityCards(), potSize: session.game.getPot() });
+            session.game.checkIfAllPlayersRevealed(); 
           }
           break;
         }
         case 'showBothCards': {
-          if (player && game) {
+          if (player && session && session.game) {
             player.showLeftCard = false;
             player.showRightCard = false;
             player.showBothCards = true;
-            broadcast(wss, { type: 'players', players });
-            broadcast(wss, { type: 'communityCards', cards: game.getCommunityCards(), potSize: game.getPot() });
-            game.checkIfAllPlayersRevealed(); 
+            broadcast(session, { type: 'players', players: session.players });
+            broadcast(session, { type: 'communityCards', cards: session.game.getCommunityCards(), potSize: session.game.getPot() });
+            session.game.checkIfAllPlayersRevealed(); 
           }
           break;
         }
 
         case 'showNone': {
-          if (player && game) {
+          if (player && session && session.game) {
             player.showLeftCard = false;
             player.showRightCard = false;
             player.showBothCards = false;
             player.showNone = true;
-            broadcast(wss, { type: 'players', players });
-            broadcast(wss, { type: 'communityCards', cards: game.getCommunityCards(), potSize: game.getPot() });
-            game.checkIfAllPlayersRevealed(); 
+            broadcast(session, { type: 'players', players: session.players });
+            broadcast(session, { type: 'communityCards', cards: session.game.getCommunityCards(), potSize: session.game.getPot() });
+            session.game.checkIfAllPlayersRevealed(); 
           }
           break;
         }
@@ -270,9 +336,9 @@ async function main() {
         }
 
         case 'chooseAvatar': {
-          if (player) {
+          if (player && session) {
             player.avatar = data.avatar;
-            broadcast(wss, { type: 'players', players });
+            broadcast(session, { type: 'players', players: session.players });
 }
           break;
         }

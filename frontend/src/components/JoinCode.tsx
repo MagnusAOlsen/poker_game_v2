@@ -1,9 +1,11 @@
 import { useLanguage } from "../context/LanguageContext";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 function JoinCode() {
+  const navigate = useNavigate();
   const { language } = useLanguage();
-
+  const [code, setCode] = useState("");
   return (
     <div
       style={{
@@ -38,12 +40,15 @@ function JoinCode() {
         <input
           type="text"
           placeholder={language === "en" ? "Join Code" : "Kode"}
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
           style={{
             padding: "10px",
             fontSize: "16px",
             borderRadius: "4px",
             border: "1px solid #ccc",
             marginLeft: "10px",
+            textTransform: "uppercase",
           }}
         />
         <button
@@ -58,7 +63,14 @@ function JoinCode() {
             marginRight: "10px",
           }}
           onClick={() => {
-            useNavigate()("/PlayerLogin");
+            // 3. Save to Session Storage
+            if (code.trim()) {
+              sessionStorage.setItem("gameCode", code.toUpperCase());
+              console.log(code);
+              navigate("/PlayerLogin");
+            } else {
+              alert("Please enter a code");
+            }
           }}
         >
           {language === "en" ? "Join" : "Bli med"}

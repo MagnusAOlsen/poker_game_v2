@@ -12,7 +12,7 @@ function HostPlaying() {
   const [currentPlayers, setCurrentPlayers] = useState<Player[]>(() => {
     return (
       (location.state as { currentPlayers?: Player[] })?.currentPlayers ||
-      (JSON.parse(sessionStorage.getItem("currentPlayers") || "{}") as Player[])
+      (JSON.parse(sessionStorage.getItem("currentPlayers") || "[]") as Player[])
     );
   });
   const [communityCards, setCommunityCards] = useState<Card[]>([]);
@@ -25,13 +25,22 @@ function HostPlaying() {
     sessionStorage.setItem("currentPlayers", JSON.stringify(currentPlayers));
     const socket = new WebSocket("ws://192.168.1.63:3000"); //Must change every time the server IP changes
     socketRef.current = socket;
+    setShuffling(false);
+
+    socket.onopen = () => {
+      const gameCode = sessionStorage.getItem("gameCode");
+      if (gameCode) {
+        socket.send(JSON.stringify({ type: "reconnectHost", code: gameCode }));
+      }
+    };
 
     socket.onmessage = (msg) => {
       const data = JSON.parse(msg.data);
-      if (data.type === "playerMove") {
+      if (data.type === "players") {
         setCurrentPlayers(data.players);
         sessionStorage.setItem("currentPlayers", JSON.stringify(data.players));
       } else if (data.type === "communityCards") {
+        setShuffling(false);
         setCommunityCards(data.cards);
         sessionStorage.setItem("communityCards", JSON.stringify(data.cards));
         setPotSize(data.potSize || 0);

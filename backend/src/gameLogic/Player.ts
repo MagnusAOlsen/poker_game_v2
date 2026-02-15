@@ -40,6 +40,7 @@ export class Player {
   public currentBet: number = 0;
   public called: boolean = false;
   public winner: boolean = false;
+  public gameCode?: string;
 
   constructor(name: string, startingChips: number = 150) {
     this.name = name;

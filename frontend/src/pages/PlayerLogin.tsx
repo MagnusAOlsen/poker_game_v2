@@ -20,6 +20,7 @@ function PlayerLogin() {
   });
 
   const { language, toggleLanguage } = useLanguage();
+  const [gameCode, setGameCode] = useState("...");
 
   const listOfAvatars: string[] = [
     "batman_logo",
@@ -43,8 +44,14 @@ function PlayerLogin() {
   const socketRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
+    const storedCode = sessionStorage.getItem("gameCode");
+    setGameCode(storedCode || "...");
+
     if (!sessionStorage.getItem("ready")) {
       sessionStorage.clear();
+    }
+    if (storedCode) {
+      sessionStorage.setItem("gameCode", storedCode);
     }
 
     sessionStorage.setItem("ready", isReady.toString());
@@ -56,7 +63,7 @@ function PlayerLogin() {
     socket.onmessage = (msg) => {
       const data = JSON.parse(msg.data);
       if (data.type === "gameStarted") {
-        navigate("/PlayerPlaying", { state: { myPlayer: data.player } });
+        navigate("/PlayerPlaying");
       }
     };
 
@@ -64,12 +71,17 @@ function PlayerLogin() {
   }, []);
 
   const handleSubmit = (name: string) => {
-    if (!socketRef.current || !name) return;
+    console.log("Sending Join Request -> Name:", name, "Code:", gameCode);
+    if (!socketRef.current || !name) {
+      return;
+    }
     sessionStorage.setItem("currentPlayer", name);
     setPlayerName(name);
     sessionStorage.setItem("ready", "true");
     setIsReady(true);
-    socketRef.current.send(JSON.stringify({ type: "join", name }));
+    socketRef.current.send(
+      JSON.stringify({ type: "join", name, gameCode: gameCode })
+    );
   };
 
   const chooseAvatar = () => {
