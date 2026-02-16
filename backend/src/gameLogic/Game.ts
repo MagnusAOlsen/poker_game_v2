@@ -22,6 +22,7 @@ export class Game {
   public currentPlayer: Player | null = null;
   public dealerPostion!: number;
   private pots: Pot[] = [];
+  private lastAggressorOnRiver: Player | null = null;
 
   constructor(players: Player[]) {
     this.players = players;
@@ -35,6 +36,7 @@ export class Game {
     this.players.forEach(player => player.resetHand());
     this.dealerPostion = dealerPosition;
     this.pots = [];
+    this.lastAggressorOnRiver = null;
 
     for (let i = 0; i < 2; i++) {
       const activePlayers = this.players.filter(p => p.chips > 0);
@@ -95,6 +97,9 @@ export class Game {
         // Raise
         lastBet = totalBet;
         playersWhoActed = new Set([player]); // Reset – everyone else must respond
+        if (this.phase === "river") {
+          this.lastAggressorOnRiver = player;
+        }
       } else {
         // Called or checked
         playersWhoActed.add(player);
@@ -225,27 +230,75 @@ export class Game {
     this.players.forEach(player => player.isDealer = false);
   }
 
-  private revealResolve: (() => void) | null = null;
 
-public waitForAllPlayersToReveal(): Promise<void> {
-  return new Promise(resolve => {
-    this.revealResolve = resolve;
-  });
-}
-
-public checkIfAllPlayersRevealed(): void {
-  const playersToReveal = this.players.filter(p => !p.hasFolded);
-  const allDone = playersToReveal.every(p =>
-    p.showLeftCard || p.showRightCard || p.showBothCards || p.showNone
-  );
-
-  if (allDone && this.revealResolve) {
-    this.revealResolve(); // Continue playRound
-    this.revealResolve = null; // Clear it
+  public async collectShowdownChoices(): Promise<void> {
+    const activePlayers = this.players.filter(p => !p.hasFolded);
+    
+    let startIndex: number;
+    
+    // Determine starting player (last aggressor or player after dealer)
+    if (this.lastAggressorOnRiver) {
+      const aggressorIndex = activePlayers.findIndex(
+        p => p.name === this.lastAggressorOnRiver!.name
+      );
+      
+      if (aggressorIndex !== -1) {
+        startIndex = aggressorIndex;
+      } else {
+        const dealerIndexInActive = activePlayers.findIndex(p => p.isDealer);
+        startIndex = dealerIndexInActive === -1 
+          ? 0 
+          : (dealerIndexInActive + 1) % activePlayers.length;
+      }
+    } else {
+      const dealerIndexInActive = activePlayers.findIndex(p => p.isDealer);
+      startIndex = dealerIndexInActive === -1 
+        ? 0 
+        : (dealerIndexInActive + 1) % activePlayers.length;
+    }
+    const playersWhoRevealed: Player[] = [];
+    
+    // Loop through players
+    for (let i = 0; i < activePlayers.length; i++) {
+      const playerIndex = (startIndex + i) % activePlayers.length;
+      const player = activePlayers[playerIndex];
+      const isLastPlayer = (i === activePlayers.length - 1);
+      
+      // Check if any previous players are still "in" (showed both cards)
+      const playersStillIn = playersWhoRevealed.slice(0, i).filter(p => p.showBothCards);
+      const isLastPlayerStanding = isLastPlayer && playersStillIn.length === 0;
+      
+      if (isLastPlayerStanding) {
+        // Last player wins automatically
+        await player.revealCards();
+        break; // End showdown early
+      } else {
+        // Normal showdown choice
+        await player.revealCards();
+        playersWhoRevealed.push(player);
+        
+        // After they choose, if they mucked (didn't show both cards), fold them
+        if (!player.showBothCards) {
+          player.hasFolded = true;
+        }
+        
+        // Check if this was the second-to-last player and they folded
+        // If so, the last player auto-wins
+        const remainingPlayers = activePlayers.filter(p => !p.hasFolded);
+        if (remainingPlayers.length === 1 && !isLastPlayer) { // ⬅️ ADD CHECK
+          // Only one player left, give them the choice
+          const lastPlayerIndex = (startIndex + i + 1) % activePlayers.length;
+          const lastPlayer = activePlayers[lastPlayerIndex];
+          
+          // Only prompt if they haven't already been processed
+          if (!lastPlayer.hasFolded && !playersWhoRevealed.includes(lastPlayer)) { // ⬅️ ADD CHECK
+            await lastPlayer.revealCards();
+          }
+          break;
+        }
+      }
+    }
   }
-}
-
-
 
   getCommunityCards(): Card[] {
     return this.communityCards;

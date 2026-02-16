@@ -26,6 +26,8 @@ export class Player {
   position!: number; //! means that it will definitely be assigned later
   private resolveBet?: (amount: number) => void;
   public notifyTurn?: (playerName: string) => void;
+  public notifyShowdown?: (playerName: string) => void;
+  private resolveReveal?: () => void;
   public isDealer: boolean = false;
   public isSmallBlind: boolean = false;
   public isBigBlind: boolean = false;
@@ -86,6 +88,23 @@ export class Player {
         }
       };
     });
+  }
+  public async revealCards(): Promise<void> {
+    if (this.notifyShowdown) {
+      this.notifyShowdown(this.name);
+    }
+
+    return new Promise((resolve) => {
+      this.resolveReveal = () => {
+        resolve();
+      };
+    });
+  }
+  public respondToShowdown(): void {
+    if (this.resolveReveal) {
+      this.resolveReveal();
+      this.resolveReveal = undefined;
+    }
   }
 
   respondToBet(amount: number): void {

@@ -19,6 +19,7 @@ function PlayerPlaying() {
   const [isRaiseActive, setIsRaiseActive] = useState(false);
   const [showFoldedCards, setShowFoldedCards] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
+  const [isLastStanding, setIsLastStanding] = useState(false);
 
   const canAct =
     isMyTurnMessage &&
@@ -68,6 +69,7 @@ function PlayerPlaying() {
       }
 
       if (data.type === "showFoldedCards") {
+        setIsLastStanding(data.isLastStanding);
         setShowFoldedCards(true);
       }
     };
@@ -197,29 +199,30 @@ function PlayerPlaying() {
       {showFoldedCards && (
         <div className="folded-cards-buttons">
           <button
-            onClick={() => sendShownCards("showLeftCard")}
-            className="action-button"
-          >
-            {language === "en" ? "Show left card" : "Vis venstre kort"}
-          </button>
-          <button
-            onClick={() => sendShownCards("showRightCard")}
-            className="action-button"
-          >
-            {language === "en" ? "Show right card" : "Vis høyre kort"}
-          </button>
-          <button
             onClick={() => sendShownCards("showBothCards")}
             className="action-button"
           >
             {language === "en" ? "Show both cards" : "Vis begge kort"}
           </button>
-          {/* <button
+          <button
+            onClick={() => sendShownCards("showLeftCard")}
+            className={isLastStanding ? "action-button" : "fold-leave-button"}
+          >
+            {language === "en" ? "Show left card" : "Vis venstre kort"}
+          </button>
+          <button
+            onClick={() => sendShownCards("showRightCard")}
+            className={isLastStanding ? "action-button" : "fold-leave-button"}
+          >
+            {language === "en" ? "Show right card" : "Vis høyre kort"}
+          </button>
+
+          <button
             onClick={() => sendShownCards("showNone")}
-            className="action-button"
+            className={isLastStanding ? "action-button" : "fold-leave-button"}
           >
             {language === "en" ? "Show none" : "Ikke vis kort"}
-          </button> */}
+          </button>
         </div>
       )}
       {isRaiseActive && (

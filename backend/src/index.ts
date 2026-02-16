@@ -65,14 +65,44 @@ async function playRound(session: Session, dealerPosition: number) {
   }
 
   const rankings = game.rankPlayers();
+  const activePlayers = game.players.filter(p => !p.hasFolded);
+  const playersWhoActed: Player[] = [];
+  let turnCounter = 0;
 
-  for (const [socket, name] of session.clients.entries()) {
-    const player = game.players.find(p => p.name === name);
-    if (player && !player.hasFolded && player.hand.length > 0 && socket.readyState === WebSocket.OPEN) {
-      socket.send(JSON.stringify({ type: 'showFoldedCards'}));
-    }
+  // Set up the callback for each player (just like notifyTurn)
+  for (const player of game.players) {
+    player.notifyShowdown = (activePlayerName) => {
+      turnCounter++; 
+      
+      // Check if this is the last player (based on turn order, not array position)
+      const isLastPlayer = turnCounter === activePlayers.length;
+      
+      const previousPlayersShowedBoth = playersWhoActed.some(
+        (p: Player) => p.showBothCards
+      );
+      
+      const isLastStanding = isLastPlayer && !previousPlayersShowedBoth;
+      
+      
+      for (const [socket, name] of session.clients.entries()) {
+        if (name === activePlayerName && socket.readyState === WebSocket.OPEN) {
+           socket.send(JSON.stringify({ 
+             type: 'showFoldedCards',
+             isLastStanding: isLastStanding
+           }));
+           break; 
+        }
+      }
+      
+      // Track that this player acted
+      const actingPlayer = game.players.find((p: Player) => p.name === activePlayerName);
+      if (actingPlayer && !playersWhoActed.includes(actingPlayer)) {
+        playersWhoActed.push(actingPlayer);
+      }
+    };
   }
-  await game.waitForAllPlayersToReveal();
+
+  await game.collectShowdownChoices();
   game.payOut(rankings)
   broadcast(session, { type: 'players', players: game.players });  
     
@@ -273,52 +303,26 @@ async function main() {
           break;
         }
 
-        case 'showLeftCard': {
-          if (player && session && session.game) {
-            player.showLeftCard = true;
-            player.showRightCard = false;
-            player.showBothCards = false;
-            broadcast(session, { type: 'players', players: session.players });
-            broadcast(session, { type: 'communityCards', cards: session.game.getCommunityCards() , potSize: session.game.getPot()});
-            session.game.checkIfAllPlayersRevealed();
-          }
-          break;
-        }
-        
-        case 'showRightCard': {
-          if (player && session && session.game) {
-            player.showLeftCard = false;
-            player.showRightCard = true;
-            player.showBothCards = false;
-            broadcast(session, { type: 'players', players: session.players });
-            broadcast(session, { type: 'communityCards', cards: session.game.getCommunityCards(), potSize: session.game.getPot() });
-            session.game.checkIfAllPlayersRevealed(); 
-          }
-          break;
-        }
-        case 'showBothCards': {
-          if (player && session && session.game) {
-            player.showLeftCard = false;
-            player.showRightCard = false;
-            player.showBothCards = true;
-            broadcast(session, { type: 'players', players: session.players });
-            broadcast(session, { type: 'communityCards', cards: session.game.getCommunityCards(), potSize: session.game.getPot() });
-            session.game.checkIfAllPlayersRevealed(); 
-          }
-          break;
-        }
+        case 'showLeftCard':
+        case 'showRightCard':
+        case 'showBothCards':
+        case 'showNone': {  if (player && session && session.game) {
+          // 1. Update player's show state
+          player.showLeftCard = data.type === 'showLeftCard';
+          player.showRightCard = data.type === 'showRightCard';
+          player.showBothCards = data.type === 'showBothCards';
+          player.showNone = data.type === 'showNone';
+          player.respondToShowdown();
 
-        case 'showNone': {
-          if (player && session && session.game) {
-            player.showLeftCard = false;
-            player.showRightCard = false;
-            player.showBothCards = false;
-            player.showNone = true;
-            broadcast(session, { type: 'players', players: session.players });
-            broadcast(session, { type: 'communityCards', cards: session.game.getCommunityCards(), potSize: session.game.getPot() });
-            session.game.checkIfAllPlayersRevealed(); 
-          }
-          break;
+          broadcast(session, { type: 'players', players: session.players });
+          broadcast(session, { 
+            type: 'communityCards', 
+            cards: session.game.getCommunityCards(), 
+            potSize: session.game.getPot() 
+          });
+          
+        }
+        break;
         }
 
         case 'addOn': {
