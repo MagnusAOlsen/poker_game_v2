@@ -81,10 +81,11 @@ export class Player {
         }
         else {
           const bet = Math.min(amount, this.chips);
-          this.currentBet = bet + playerBetSoFar;
-          this.chips -= bet;
+          const additionalBet = bet - playerBetSoFar;
+          this.currentBet = bet;
+          this.chips -= additionalBet;
           if (this.chips === 0) this.isAllIn = true;
-          resolve(bet);
+          resolve(additionalBet);
         }
       };
     });

@@ -50,7 +50,8 @@ async function playRound(session: Session, dealerPosition: number) {
     player.notifyTurn = (activePlayerName) => {
       for (const [socket, name] of session.clients.entries()) {
         if (name === activePlayerName && socket.readyState === WebSocket.OPEN) {
-           socket.send(JSON.stringify({ type: 'yourTurn' }));
+          const number = player.currentBet + game.callingAmount + game.minRaise;
+           socket.send(JSON.stringify({ type: 'yourTurn', minRaise: number }));
            break; 
         }
       }
@@ -275,9 +276,10 @@ async function main() {
 
         case 'raise': {
           if (player && session) {
-            player.respondToBet(data.amount);
+            const number = Math.max(data.minRaise, data.amount);
+            player.respondToBet(number);
               socket.send(JSON.stringify({ type: 'player', player }));
-              broadcast(session, { type: 'players', players: session.players });
+              broadcast(session, { type: 'players', players: session.players, minRaise: number });
           }
           break;
         }

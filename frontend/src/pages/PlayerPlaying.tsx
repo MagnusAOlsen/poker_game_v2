@@ -20,6 +20,7 @@ function PlayerPlaying() {
   const [showFoldedCards, setShowFoldedCards] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [isLastStanding, setIsLastStanding] = useState(false);
+  const [minRaise, setMinRaise] = useState(0);
 
   const canAct =
     isMyTurnMessage &&
@@ -59,16 +60,17 @@ function PlayerPlaying() {
           setIsMyTurnMessage(true);
           sessionStorage.setItem("isMyTurn", "true");
         }
-      }
-
-      if (data.type === "yourTurn") {
+      } else if (data.type === "players") {
+        if (data.minRaise !== undefined) {
+          setMinRaise(data.minRaise);
+        }
+      } else if (data.type === "yourTurn") {
         setIsRaiseActive(false);
         setShowFoldedCards(false);
         setIsMyTurnMessage(true);
+        setMinRaise(data.minRaise);
         sessionStorage.setItem("isMyTurn", "true");
-      }
-
-      if (data.type === "showFoldedCards") {
+      } else if (data.type === "showFoldedCards") {
         setIsLastStanding(data.isLastStanding);
         setShowFoldedCards(true);
       }
@@ -77,9 +79,11 @@ function PlayerPlaying() {
     return () => socket.close();
   }, []);
 
-  const sendMove = (action: string, amount?: number) => {
+  const sendMove = (action: string, amount?: number, minRaise?: number) => {
     if (socketRef.current && myPlayer) {
-      socketRef.current.send(JSON.stringify({ type: action, amount }));
+      socketRef.current.send(
+        JSON.stringify({ type: action, amount: amount, minRaise: minRaise })
+      );
     }
     setIsMyTurnMessage(false);
     sessionStorage.setItem("isMyTurn", "false");
@@ -228,11 +232,11 @@ function PlayerPlaying() {
       {isRaiseActive && (
         <div className="raise-slider-wrapper">
           <SliderInput
-            min={0}
+            min={minRaise}
             max={myPlayer?.chips || 0}
-            initialValue={0}
+            initialValue={minRaise}
             onConfirm={(value) => {
-              sendMove("raise", value);
+              sendMove("raise", value, minRaise);
               setIsRaiseActive(false);
             }}
             onReject={() => {

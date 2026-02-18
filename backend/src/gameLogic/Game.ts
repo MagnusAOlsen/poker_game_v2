@@ -23,6 +23,8 @@ export class Game {
   public dealerPostion!: number;
   private pots: Pot[] = [];
   private lastAggressorOnRiver: Player | null = null;
+  public minRaise: number = 2;
+  public callingAmount: number = 0;
 
   constructor(players: Player[]) {
     this.players = players;
@@ -37,6 +39,7 @@ export class Game {
     this.dealerPostion = dealerPosition;
     this.pots = [];
     this.lastAggressorOnRiver = null;
+    this.minRaise = 2;
 
     for (let i = 0; i < 2; i++) {
       const activePlayers = this.players.filter(p => p.chips > 0);
@@ -73,6 +76,7 @@ export class Game {
     } else {
       currentPlayerIndex = (dealerIndexInActive + 1) % activePlayers.length;
       lastBet = 0; // No bets yet
+      this.minRaise = 2;
     }
     
   
@@ -87,6 +91,7 @@ export class Game {
 
       const playerBetSoFar = bets.get(player)!;
       const amountToCall = Math.max(lastBet - playerBetSoFar, 0);
+      this.callingAmount = amountToCall;
       const bet = await player.bet(amountToCall, playerBetSoFar);
       
       const totalBet = playerBetSoFar + bet;
@@ -96,6 +101,7 @@ export class Game {
       if (bet > amountToCall) {
         // Raise
         lastBet = totalBet;
+        this.minRaise = Math.max(2, bet - amountToCall);
         playersWhoActed = new Set([player]); // Reset – everyone else must respond
         if (this.phase === "river") {
           this.lastAggressorOnRiver = player;
