@@ -11,6 +11,7 @@ interface Session {
   players: Player[];
   clients: Map<WebSocket, string>;
   game: Game | null;
+  waitingPlayers: Player[];
 }
 
 async function broadcast(session: Session, message: any) {
@@ -168,7 +169,8 @@ async function main() {
             host: socket,
             players: [],
             clients: new Map(),
-            game: null
+            game: null,
+            waitingPlayers: []
           };
           sessions.set(code, newSession);
           socketToGameCode.set(socket, code);
@@ -194,60 +196,104 @@ async function main() {
           const session = sessions.get(newGameCode);
 
           if (session && newGameCode) {
-            if (!session.players.find(p => p.name === data.name) && session.players.length < 7) {
+            const existingPlayer = session.players.find(p => p.name === data.name);
+            const existingWaiting = session.waitingPlayers.find(p => p.name === data.name);
+            
+            // Check if game is in progress or in progress
+            const gameInProgress = session.game !== null;
+            const gameFull = session.players.length >= 7;
+            
+            if (!existingPlayer && !existingWaiting) {
               const newPlayer = new Player(data.name);
-              session.players.push(newPlayer);
+              
+              if (gameInProgress || gameFull) {
+                session.waitingPlayers.push(newPlayer);
+                socket.send(JSON.stringify({ 
+                  type: 'waitingToJoin',
+                  message: 'You will join after the current round ends'
+                }));
+              } else {
+                session.players.push(newPlayer);
+              }
+              
               session.clients.set(socket, data.name);
               socketToGameCode.set(socket, newGameCode);
-          }
-          session.clients.set(socket, data.name)
-          broadcast(session, { type: "players", players: session.players });
+            } else {
+              session.clients.set(socket, data.name);
+            }
+            
+            broadcast(session, { type: "players", players: session.players });
           }
           break;
         }
 
         case 'startGame': {
           if (session && gameCode) {
-          await updateGameStats(session.players.length);
-          ;
-          const loopRounds = async () => {
-            let dealerPosition = 0;
-            while (true) {
-              const playersWithCash = session.players.filter(p => p.chips > 0);
-              if (playersWithCash.length < 2) break;
-              
-              broadcast(session, { type: 'gameStarted' });
-              broadcast(session, { type: 'players', players: session.players });
-              
-              const game = new Game(session.players);
-              session.game = game;
-              await playRound(session, dealerPosition);
-          
-              await new Promise(resolve => setTimeout(resolve, 3000));
+            await updateGameStats(session.players.length);
+            
+            const loopRounds = async () => {
+              let dealerPosition = 0;
+              while (true) {
+                const playersWithCash = session.players.filter(p => p.chips > 0);
+                if (playersWithCash.length < 2) break;
+                
 
-              for (const player of session.players) {
-                if (player.leave) {
-                  session.players.splice(session.players.indexOf(player), 1);
-                  const socketToDelete = [...session.clients.entries()].find(([_, name]) => name === player.name)?.[0];
-                  if (socketToDelete) {
-                    session.clients.delete(socketToDelete);
+                const activePlayerNames = session.players.map(p => p.name);
+                for (const [socket, name] of session.clients.entries()) {
+                  if (activePlayerNames.includes(name) && socket.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify({ type: 'gameStarted' }));
+                    }
+                  }
+                for (const waitingPlayer of session.waitingPlayers) {
+                  for (const [socket, name] of session.clients.entries()) {
+                    if (name === waitingPlayer.name && socket.readyState === 1) {
+                      socket.send(JSON.stringify({ 
+                        type: 'stillWaiting'
+                      }));
+                    }
                   }
                 }
-                else if (player.addOn) {
-                  player.chips = 150;
-                  player.addOn = false;
+                broadcast(session, { type: 'players', players: session.players });
+                
+                const game = new Game(session.players);
+                session.game = game;
+                await playRound(session, dealerPosition);
+            
+                await new Promise(resolve => setTimeout(resolve, 3000));
+
+                // Handle add-ons and leaves
+                for (const player of session.players) {
+                  if (player.leave) {
+                    session.players.splice(session.players.indexOf(player), 1);
+                    const socketToDelete = [...session.clients.entries()].find(([_, name]) => name === player.name)?.[0];
+                    if (socketToDelete) {
+                      session.clients.delete(socketToDelete);
+                    }
+                  }
+                  else if (player.addOn) {
+                    player.chips = 150;
+                    player.addOn = false;
+                  }
                 }
+
+                if (session.waitingPlayers.length > 0) {
+                  while (session.waitingPlayers.length > 0 && session.players.length < 7) {
+                    const waitingPlayer = session.waitingPlayers.shift()!; // Remove first player
+                    session.players.push(waitingPlayer);
+                  }
+                  
+                  broadcast(session, { type: 'players', players: session.players });
+                }
+
+                // Rotate dealer only to active players
+                do {
+                  dealerPosition = (dealerPosition + 1) % session.players.length;
+                } while (session.players[dealerPosition].chips === 0);
               }
-          
-              // Rotate dealer only to active players
-              do {
-                dealerPosition = (dealerPosition + 1) % session.players.length;
-              } while (session.players[dealerPosition].chips === 0);
-            }
-          };
-          
-          loopRounds();
-        }
+            };
+            
+            loopRounds();
+          }
           break;
         }
 
@@ -342,10 +388,18 @@ async function main() {
         }
 
         case 'chooseAvatar': {
-          if (player && session) {
-            player.avatar = data.avatar;
-            broadcast(session, { type: 'players', players: session.players });
-}
+          if (session) {
+            const playerName = session.clients.get(socket);
+            let player = session.players.find(p => p.name === playerName);
+            if (!player) {
+              player = session.waitingPlayers.find(p => p.name === playerName);
+            }
+            
+            if (player) {
+              player.avatar = data.avatar;
+              broadcast(session, { type: 'players', players: session.players });
+            }
+          }
           break;
         }
         

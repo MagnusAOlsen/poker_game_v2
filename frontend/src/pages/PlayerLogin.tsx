@@ -21,6 +21,7 @@ function PlayerLogin() {
 
   const { language, toggleLanguage } = useLanguage();
   const [gameCode, setGameCode] = useState("...");
+  let message = "";
 
   const listOfAvatars: string[] = [
     "batman_logo",
@@ -40,6 +41,7 @@ function PlayerLogin() {
     const storedAvatar = sessionStorage.getItem("avatarPath");
     return storedAvatar || `../avatars/${listOfAvatars.at(currentIndex)}.png`;
   });
+  const [waitingMessage, setWaitingMessage] = useState(false);
 
   const socketRef = useRef<WebSocket | null>(null);
 
@@ -64,6 +66,8 @@ function PlayerLogin() {
       const data = JSON.parse(msg.data);
       if (data.type === "gameStarted") {
         navigate("/PlayerPlaying");
+      } else if (data.type === "stillWaiting") {
+        setWaitingMessage(true);
       }
     };
 
@@ -172,11 +176,19 @@ function PlayerLogin() {
             </div>
           )}
 
-          {avatar !== "" && (
+          {!waitingMessage && avatar !== "" && (
             <p className="waiting-text">
               {language === "en"
                 ? `Waiting for the host to start the game`
                 : `Venter på at spillet skal starte`}
+              <AnimatedEllipsis />
+            </p>
+          )}
+          {waitingMessage && avatar !== "" && (
+            <p className="waiting-text">
+              {language === "en"
+                ? `The game is full, waiting for players to leave`
+                : `Spillet er fullt, venter på ledig plass is spillet`}
               <AnimatedEllipsis />
             </p>
           )}

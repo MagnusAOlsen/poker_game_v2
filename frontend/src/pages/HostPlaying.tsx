@@ -5,6 +5,7 @@ import { Player } from "../../../backend/src/gameLogic/Player.ts";
 import { useState, useEffect, useRef } from "react";
 import { Card } from "../../../backend/src/gameLogic/Card.ts";
 import MusicButton from "../components/MusicButton.tsx";
+import LanguageButton from "../components/LanguageButton.tsx";
 
 function HostPlaying() {
   const location = useLocation();
@@ -69,6 +70,7 @@ function HostPlaying() {
         communityCards={communityCards}
         potSize={potSize}
         shuffling={shuffling}
+        gameCode={sessionStorage.getItem("gameCode") || ""}
       />
       <div
         style={{
@@ -82,6 +84,7 @@ function HostPlaying() {
           borderBottomLeftRadius: "12px",
         }}
       >
+        <LanguageButton />
         <MusicButton />
       </div>
     </div>

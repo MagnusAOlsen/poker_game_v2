@@ -5,12 +5,14 @@ import { Player } from "../../../backend/src/gameLogic/Player.ts";
 import { Card } from "../../../backend/src/gameLogic/Card.ts";
 import thePot from "../assets/poker_chips.png";
 import ShuffleAnimation from "./ShuffleAnimation.tsx";
+import { useLanguage } from "../context/LanguageContext.tsx";
 
 type PlayingProps = {
   playersPlaying: Player[];
   communityCards?: Card[];
   potSize: number;
   shuffling: boolean;
+  gameCode: string;
 };
 
 function Playing({
@@ -18,10 +20,11 @@ function Playing({
   communityCards,
   potSize,
   shuffling,
+  gameCode,
 }: PlayingProps) {
   const centerX = 800;
   const centerY = 440;
-
+  const { language } = useLanguage();
   const curveRadiusX = 150;
   const curveRadiusY = 190;
   const bottomPlayerSpacing = 320;
@@ -83,18 +86,41 @@ function Playing({
       <PokerBackground />
       {shuffling && <ShuffleAnimation />}
       {!shuffling && (
-        <img
-          src={deck_of_cards}
-          alt="Deck"
-          style={{
-            position: "absolute",
-            width: "70px",
-            top: "20px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 5,
-          }}
-        />
+        <>
+          <img
+            src={deck_of_cards}
+            alt="Deck"
+            style={{
+              position: "absolute",
+              width: "70px",
+              top: "20px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              zIndex: 5,
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              top: "20px",
+              left: "55%",
+              transform: "translateX(50px)", // Positioned to the right of the deck
+              backgroundColor: "rgba(0, 0, 0, 0.7)",
+              color: "white",
+              padding: "8px 16px",
+              borderRadius: "8px",
+              fontSize: "16px",
+              fontWeight: "bold",
+              fontFamily: "monospace",
+              zIndex: 5,
+              border: "2px solid #FFD700",
+            }}
+          >
+            {language === "en"
+              ? "Game code: " + gameCode
+              : "Spillkode: " + gameCode}
+          </div>
+        </>
       )}
 
       <div
