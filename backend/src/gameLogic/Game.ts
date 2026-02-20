@@ -56,11 +56,7 @@ export class Game {
     const bets = new Map<Player, number>();
     const smallBlindPlayer = activePlayers.find(p => p.isSmallBlind);
     const bigBlindPlayer = activePlayers.find(p => p.isBigBlind);
-
-    for (const p of activePlayers) {
-      bets.set(p, 0);
-    }
-  
+    activePlayers.forEach(p => bets.set(p, 0));
     let currentPlayerIndex: number;
     let lastBet: number;
     let playersWhoActed = new Set<Player>();

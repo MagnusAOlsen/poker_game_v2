@@ -21,7 +21,6 @@ function PlayerLogin() {
 
   const { language, toggleLanguage } = useLanguage();
   const [gameCode, setGameCode] = useState("...");
-  let message = "";
 
   const listOfAvatars: string[] = [
     "batman_logo",

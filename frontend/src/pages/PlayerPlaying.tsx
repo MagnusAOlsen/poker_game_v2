@@ -233,7 +233,7 @@ function PlayerPlaying() {
         <div className="raise-slider-wrapper">
           <SliderInput
             min={minRaise}
-            max={myPlayer?.chips || 0}
+            max={(myPlayer?.chips || 0) + (myPlayer?.currentBet || 0)}
             initialValue={minRaise}
             onConfirm={(value) => {
               sendMove("raise", value, minRaise);

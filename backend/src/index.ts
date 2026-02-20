@@ -63,6 +63,9 @@ async function playRound(session: Session, dealerPosition: number) {
     await game.collectBets();
     broadcast(session, { type: "players", players: game.players });
     game.nextPhase();
+    game.players.forEach(p => {
+      p.currentBet = 0;
+    });
     broadcast(session, { type: "communityCards", cards: game.getCommunityCards(), potSize: game.getPot() });
   }
 

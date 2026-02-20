@@ -80,7 +80,7 @@ export class Player {
           resolve(bet);
         }
         else {
-          const bet = Math.min(amount, this.chips);
+          const bet = Math.min(amount, (this.chips + playerBetSoFar));
           const additionalBet = bet - playerBetSoFar;
           this.currentBet = bet;
           this.chips -= additionalBet;
