@@ -78,6 +78,8 @@ export class Game {
   
     while (true) {
       if (activePlayers.length <= 1) break;
+      const playersStillIn = activePlayers.filter(p => !p.hasFolded);
+      if (playersStillIn.length <= 1) break;
       const player = activePlayers[currentPlayerIndex];
       if (player.isAllIn || player.chips === 0 || player.hasFolded) {
         currentPlayerIndex = (currentPlayerIndex + 1) % activePlayers.length;
