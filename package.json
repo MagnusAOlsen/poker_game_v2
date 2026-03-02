@@ -13,7 +13,14 @@
     "type": "git",
     "url": "git+https://github.com/MagnusAOlsen/poker_game_v2.git"
   },
-  "keywords": ["poker", "react", "vite", "node", "typescript", "websocket"],
+  "keywords": [
+    "poker",
+    "react",
+    "vite",
+    "node",
+    "typescript",
+    "websocket"
+  ],
   "author": "Magnus Olsen",
   "license": "ISC",
   "bugs": {
@@ -21,6 +28,10 @@
   },
   "homepage": "https://github.com/MagnusAOlsen/poker_game_v2#readme",
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "concurrently": "^9.2.1",
+    "tsx": "^4.21.0"
+  },
+  "dependencies": {
+    "mongodb": "^7.1.0"
   }
 }

@@ -1,10 +1,12 @@
+import { connectDB } from './database/connection.ts';
+import { updateGameStats } from "./database/GameStats.ts";
+await connectDB();
 import { WebSocketServer, WebSocket } from 'ws';
 import http from 'http';
 import { Player } from "./gameLogic/Player.ts";
 import { Game } from "./gameLogic/Game.ts";
 import ip from 'ip';
-import { connectDB } from './database/connection.ts';
-import { GameStats } from "./database/GameStats.ts";
+
 
 interface Session {
   host: WebSocket;
@@ -99,7 +101,6 @@ async function playRound(session: Session, dealerPosition: number) {
         }
       }
       
-      // Track that this player acted
       const actingPlayer = game.players.find((p: Player) => p.name === activePlayerName);
       if (actingPlayer && !playersWhoActed.includes(actingPlayer)) {
         playersWhoActed.push(actingPlayer);
@@ -113,7 +114,7 @@ async function playRound(session: Session, dealerPosition: number) {
     
 }};
 
-async function updateGameStats(playerCount: number) {
+/* async function updateGameStats(playerCount: number) {
   const stats = await GameStats.findOne();
 
   if (!stats) {
@@ -131,7 +132,7 @@ async function updateGameStats(playerCount: number) {
     stats.averagePlayersPerGame = newAverage;
     await stats.save();
   }
-}
+} */
   
 
 async function main() {
