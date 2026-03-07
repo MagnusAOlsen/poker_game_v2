@@ -1,4 +1,4 @@
-import QRCode from 'qrcode';
+import * as QRCode from 'qrcode';
 import ip from 'ip';
 import fs from 'fs';
 import path from 'path';

@@ -4,7 +4,7 @@ import PokerBackground from "../components/PokerBackground";
 import LoginField from "../components/LoginField";
 import StartGameButton from "../components/StartGameButton";
 import MusicButton from "../components/MusicButton";
-import { Player } from "../../../backend/src/gameLogic/Player.ts";
+import type { Player } from "../types/Player";
 import LanguageButton from "../components/LanguageButton";
 import { useLanguage } from "../context/LanguageContext";
 
@@ -30,7 +30,9 @@ function HostWaiting() {
 
   useEffect(() => {
     sessionStorage.setItem("currentPlayers", JSON.stringify(currentPlayers));
-    const socket = new WebSocket("ws://192.168.1.63:3000"); //Must change every time the server IP changes
+    const socket = new WebSocket(
+      import.meta.env.VITE_WS_URL || "ws://localhost:3000"
+    );
     socketRef.current = socket;
 
     socket.onopen = () => {

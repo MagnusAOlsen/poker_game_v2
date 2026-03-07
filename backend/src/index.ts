@@ -1,10 +1,10 @@
-import { connectDB } from './database/connection.ts';
-import { updateGameStats } from "./database/GameStats.ts";
+import { connectDB } from './database/connection.js';
+import { updateGameStats } from "./database/GameStats.js";
 await connectDB();
 import { WebSocketServer, WebSocket } from 'ws';
 import http from 'http';
-import { Player } from "./gameLogic/Player.ts";
-import { Game } from "./gameLogic/Game.ts";
+import { Player } from "./gameLogic/Player.js";
+import { Game } from "./gameLogic/Game.js";
 import ip from 'ip';
 
 
@@ -136,7 +136,16 @@ async function playRound(session: Session, dealerPosition: number) {
   
 
 async function main() {
-  const server = http.createServer();
+  const server = http.createServer((req, res) => {
+    if (req.url === "/health") {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ ok: true }));
+      return;
+    }
+  
+    res.writeHead(200, { "Content-Type": "text/plain" });
+    res.end("Poker backend is running");
+  });
   const wss = new WebSocketServer({ server });
   await connectDB();
   const sessions = new Map<string, Session>();
@@ -415,11 +424,12 @@ async function main() {
   });
 
   const localIP = ip.address();
-  const port = 3000;
+  const port = parseInt(process.env.PORT || '3000', 10);
   const url = `http://${localIP}:${port}/PlayerLogin`;
 
   server.listen(port, "0.0.0.0", () => {
-    console.log(`Server listening on ${url}`);
+    console.log(`Server listening on port ${port}`);
+    console.log(`Local URL: ${url}`);
   });
 }
 

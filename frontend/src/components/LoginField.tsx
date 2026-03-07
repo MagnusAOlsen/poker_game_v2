@@ -1,5 +1,5 @@
 import "./styles/LoginField.css";
-import { Player } from "../../../backend/src/gameLogic/Player.ts";
+import type { Player } from "../types/Player";
 import AnimatedEllipsis from "./animatedEllipsis.tsx";
 import { useLanguage } from "../context/LanguageContext";
 

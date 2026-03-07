@@ -1,7 +1,7 @@
 import "./styles/General.css";
 import startIcon from "../assets/play_button.png";
 import { useNavigate } from "react-router-dom";
-import { Player } from "../../../backend/src/gameLogic/Player.ts";
+import type { Player } from "../types/Player";
 
 type Props = {
   currentPlayers: Player[];

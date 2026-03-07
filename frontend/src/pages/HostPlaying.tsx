@@ -1,9 +1,9 @@
 import "../components/styles/General.css";
 import Playing from "../components/Playing";
 import { useLocation } from "react-router-dom";
-import { Player } from "../../../backend/src/gameLogic/Player.ts";
+import type { Player } from "../types/Player";
 import { useState, useEffect, useRef } from "react";
-import { Card } from "../../../backend/src/gameLogic/Card.ts";
+import type { Card } from "../types/Card";
 import MusicButton from "../components/MusicButton.tsx";
 import LanguageButton from "../components/LanguageButton.tsx";
 
@@ -24,7 +24,9 @@ function HostPlaying() {
 
   useEffect(() => {
     sessionStorage.setItem("currentPlayers", JSON.stringify(currentPlayers));
-    const socket = new WebSocket("ws://192.168.1.63:3000"); //Must change every time the server IP changes
+    const socket = new WebSocket(
+      import.meta.env.VITE_WS_URL || "ws://localhost:3000"
+    );
     socketRef.current = socket;
     setShuffling(false);
 

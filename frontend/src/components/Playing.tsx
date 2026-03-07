@@ -1,8 +1,8 @@
 import PokerBackground from "./PokerBackground";
 import deck_of_cards from "../assets/deck_of_cards.png";
 import PlayerOnBoard from "./PlayerOnBoard";
-import { Player } from "../../../backend/src/gameLogic/Player.ts";
-import { Card } from "../../../backend/src/gameLogic/Card.ts";
+import type { Player } from "../types/Player";
+import type { Card } from "../types/Card";
 import thePot from "../assets/poker_chips.png";
 import ShuffleAnimation from "./ShuffleAnimation.tsx";
 import { useLanguage } from "../context/LanguageContext.tsx";

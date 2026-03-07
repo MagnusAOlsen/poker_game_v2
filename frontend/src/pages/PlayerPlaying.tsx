@@ -1,9 +1,9 @@
 import "../components/styles/PlayerPlaying.css";
 import "../components/styles/General.css";
-import { Player } from "../../../backend/src/gameLogic/Player";
+import type { Player } from "../types/Player";
 import SliderInput from "../components/SliderInput";
 import { useState, useEffect, useRef } from "react";
-import { Card } from "../../../backend/src/gameLogic/Card";
+import type { Card } from "../types/Card";
 import { useLanguage } from "../context/LanguageContext";
 import norwegianFlag from "../assets/Norge.png";
 import americanFlag from "../assets/USA.png";
@@ -32,7 +32,9 @@ function PlayerPlaying() {
     !isMyTurnMessage && myPlayer !== null && !isRaiseActive && !showFoldedCards;
 
   useEffect(() => {
-    const socket = new WebSocket("ws://192.168.1.63:3000");
+    const socket = new WebSocket(
+      import.meta.env.VITE_WS_URL || "ws://localhost:3000"
+    );
     socketRef.current = socket;
 
     socket.onopen = () => {
@@ -120,7 +122,7 @@ function PlayerPlaying() {
         </h1>
       </div>
       <div className="card-row">
-        {myPlayer?.hand?.map((card, i) => (
+        {myPlayer?.hand?.map((card: Card, i: number) => (
           <img
             key={i}
             src={getCardImage(card)}

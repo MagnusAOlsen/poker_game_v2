@@ -1,4 +1,4 @@
-import { Card } from './Card.ts';
+import { Card } from './Card.js';
 
 
 export interface EvaluatedHand {

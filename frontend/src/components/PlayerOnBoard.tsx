@@ -1,8 +1,8 @@
 import "./styles/PlayerOnBoard.css";
 import poker_chips from "../assets/poker_chips.png";
 import card_backside from "../assets/card_backside.png";
-import { Player } from "../../../backend/src/gameLogic/Player.ts";
-import { Card } from "../../../backend/src/gameLogic/Card.ts";
+import type { Player } from "../types/Player";
+import type { Card } from "../types/Card";
 import dealer_button from "../assets/dealer_button.png";
 import crown from "../assets/crown.png";
 
