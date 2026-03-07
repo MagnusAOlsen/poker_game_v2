@@ -9,8 +9,8 @@ export class Card {
       this.suit = suit; 
       this.rank = rank;
     }
-
+/* 
   toString(): string {
     return `${this.rank} of ${this.suit}`;
-  }
+  } */
 }
