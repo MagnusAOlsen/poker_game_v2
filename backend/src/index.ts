@@ -113,26 +113,6 @@ async function playRound(session: Session, dealerPosition: number) {
   broadcast(session, { type: 'players', players: game.players });  
     
 }};
-
-/* async function updateGameStats(playerCount: number) {
-  const stats = await GameStats.findOne();
-
-  if (!stats) {
-    // Create first record
-    await GameStats.create({
-      gamesPlayed: 1,
-      averagePlayersPerGame: playerCount
-    });
-  } else {
-    // Update existing record
-    const newGamesPlayed = stats.gamesPlayed + 1;
-    const newAverage = ((stats.averagePlayersPerGame * stats.gamesPlayed) + playerCount) / newGamesPlayed;
-
-    stats.gamesPlayed = newGamesPlayed;
-    stats.averagePlayersPerGame = newAverage;
-    await stats.save();
-  }
-} */
   
 
 async function main() {
@@ -249,6 +229,32 @@ async function main() {
               while (true) {
                 const playersWithCash = session.players.filter(p => p.chips > 0);
                 if (playersWithCash.length < 2) break;
+
+                // Handle add-ons and leaves
+                for (const player of session.players) {
+                  if (player.leave) {
+                    session.players.splice(session.players.indexOf(player), 1);
+                    const socketToDelete = [...session.clients.entries()].find(([_, name]) => name === player.name)?.[0];
+                    if (socketToDelete) {
+                      session.clients.delete(socketToDelete);
+                    }
+                  }
+                  else if (player.addOn) {
+                    player.chips = 150;
+                    player.addOn = false;
+                  }
+                }
+
+                let addedPlayers = 0;
+                if (session.waitingPlayers.length > 0) {
+                  while (session.waitingPlayers.length > 0 && session.players.length < 7) {
+                    const waitingPlayer = session.waitingPlayers.shift()!; // Remove first player
+                    session.players.push(waitingPlayer);
+                    addedPlayers++;
+                  }
+                  broadcast(session, { type: 'players', players: session.players });
+                  await updateGameStats(session.players.length, addedPlayers);
+                }
                 
 
                 const activePlayerNames = session.players.map(p => p.name);
@@ -274,29 +280,7 @@ async function main() {
             
                 await new Promise(resolve => setTimeout(resolve, 3000));
 
-                // Handle add-ons and leaves
-                for (const player of session.players) {
-                  if (player.leave) {
-                    session.players.splice(session.players.indexOf(player), 1);
-                    const socketToDelete = [...session.clients.entries()].find(([_, name]) => name === player.name)?.[0];
-                    if (socketToDelete) {
-                      session.clients.delete(socketToDelete);
-                    }
-                  }
-                  else if (player.addOn) {
-                    player.chips = 150;
-                    player.addOn = false;
-                  }
-                }
-
-                if (session.waitingPlayers.length > 0) {
-                  while (session.waitingPlayers.length > 0 && session.players.length < 7) {
-                    const waitingPlayer = session.waitingPlayers.shift()!; // Remove first player
-                    session.players.push(waitingPlayer);
-                  }
-                  
-                  broadcast(session, { type: 'players', players: session.players });
-                }
+                
 
                 // Rotate dealer only to active players
                 do {
