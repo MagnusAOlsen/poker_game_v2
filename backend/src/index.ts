@@ -1,11 +1,11 @@
 import { connectDB } from './database/connection.js';
 import { updateGameStats } from "./database/GameStats.js";
-await connectDB();
 import { WebSocketServer, WebSocket } from 'ws';
 import http from 'http';
 import { Player } from "./gameLogic/Player.js";
 import { Game } from "./gameLogic/Game.js";
 import ip from 'ip';
+import { clear } from 'console';
 
 
 interface Session {
@@ -14,6 +14,8 @@ interface Session {
   clients: Map<WebSocket, string>;
   game: Game | null;
   waitingPlayers: Player[];
+  turnReminders: Map<string, NodeJS.Timeout>;
+  showdownReminders: Map<string, NodeJS.Timeout>;
 }
 
 async function broadcast(session: Session, message: any) {
@@ -26,6 +28,74 @@ async function broadcast(session: Session, message: any) {
       client.send(msg);
     };
   });
+}
+
+function clearTurnReminder(session: Session, playerName: string) {
+  const timer = session.turnReminders.get(playerName);
+  if (timer) {
+    clearInterval(timer);
+    session.turnReminders.delete(playerName);
+  }
+}
+
+function clearShowdownReminder(session: Session, playerName: string) {
+  const timer = session.showdownReminders.get(playerName);
+  if (timer) {
+    clearInterval(timer);
+    session.showdownReminders.delete(playerName);
+  }
+}
+
+function startTurnReminder(
+  session: Session,
+  playerName: string,
+  payloadFactory: () => any,
+  intervalMs = 4000
+) {
+  clearTurnReminder(session, playerName);
+
+  const sendReminder = () => {
+    for (const [socket, name] of session.clients.entries()) {
+      if (name === playerName && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify(payloadFactory()));
+        break;
+      }
+    }
+  };
+
+  sendReminder(); // send immediately once
+
+  const timer = setInterval(() => {
+    sendReminder();
+  }, intervalMs);
+
+  session.turnReminders.set(playerName, timer);
+}
+
+function startShowdownReminder(
+  session: Session,
+  playerName: string,
+  payloadFactory: () => any,
+  intervalMs = 4000
+) {
+  clearShowdownReminder(session, playerName);
+
+  const sendReminder = () => {
+    for (const [socket, name] of session.clients.entries()) {
+      if (name === playerName && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify(payloadFactory()));
+        break;
+      }
+    }
+  };
+
+  sendReminder(); // send immediately once
+
+  const timer = setInterval(() => {
+    sendReminder();
+  }, intervalMs);
+
+  session.showdownReminders.set(playerName, timer);
 }
 
 async function playRound(session: Session, dealerPosition: number) {
@@ -51,13 +121,22 @@ async function playRound(session: Session, dealerPosition: number) {
 
   for (const player of game.players) {
     player.notifyTurn = (activePlayerName) => {
-      for (const [socket, name] of session.clients.entries()) {
-        if (name === activePlayerName && socket.readyState === WebSocket.OPEN) {
-          const number = player.currentBet + game.callingAmount + game.minRaise;
-           socket.send(JSON.stringify({ type: 'yourTurn', minRaise: number }));
-           break; 
-        }
-      }
+      startTurnReminder(
+        session,
+        activePlayerName,
+        () => {
+          const activePlayer = game.players.find(p => p.name === activePlayerName);
+          const minRaise = activePlayer
+            ? activePlayer.currentBet + game.callingAmount + game.minRaise
+            : game.callingAmount + game.minRaise;
+  
+          return {
+            type: 'yourTurn',
+            minRaise
+          };
+        },
+        4000
+      );
     };
   }
 
@@ -79,28 +158,26 @@ async function playRound(session: Session, dealerPosition: number) {
   // Set up the callback for each player (just like notifyTurn)
   for (const player of game.players) {
     player.notifyShowdown = (activePlayerName) => {
-      turnCounter++; 
-      
-      // Check if this is the last player (based on turn order, not array position)
+      turnCounter++;
+  
       const isLastPlayer = turnCounter === activePlayers.length;
-      
+  
       const previousPlayersShowedBoth = playersWhoActed.some(
         (p: Player) => p.showBothCards
       );
-      
+  
       const isLastStanding = isLastPlayer && !previousPlayersShowedBoth;
-      
-      
-      for (const [socket, name] of session.clients.entries()) {
-        if (name === activePlayerName && socket.readyState === WebSocket.OPEN) {
-           socket.send(JSON.stringify({ 
-             type: 'showFoldedCards',
-             isLastStanding: isLastStanding
-           }));
-           break; 
-        }
-      }
-      
+  
+      startShowdownReminder(
+        session,
+        activePlayerName,
+        () => ({
+          type: 'showFoldedCards',
+          isLastStanding
+        }),
+        4000
+      );
+  
       const actingPlayer = game.players.find((p: Player) => p.name === activePlayerName);
       if (actingPlayer && !playersWhoActed.includes(actingPlayer)) {
         playersWhoActed.push(actingPlayer);
@@ -111,6 +188,12 @@ async function playRound(session: Session, dealerPosition: number) {
   await game.collectShowdownChoices();
   game.payOut(rankings)
   broadcast(session, { type: 'players', players: game.players });  
+  for (const name of session.turnReminders.keys()) {
+    clearTurnReminder(session, name);
+  }
+  for (const name of session.showdownReminders.keys()) {
+    clearShowdownReminder(session, name);
+  }
     
 }};
   
@@ -139,6 +222,11 @@ async function main() {
       if (!code) return;
       const session = sessions.get(code);
       if (!session) return;
+      const playerName = session.clients.get(socket);
+      if (playerName) {
+        clearTurnReminder(session, playerName);
+        clearShowdownReminder(session, playerName);
+      }
       session.clients.delete(socket);
     });
 
@@ -163,7 +251,9 @@ async function main() {
             players: [],
             clients: new Map(),
             game: null,
-            waitingPlayers: []
+            waitingPlayers: [],
+            turnReminders: new Map(),
+            showdownReminders: new Map()
           };
           sessions.set(code, newSession);
           socketToGameCode.set(socket, code);
@@ -222,7 +312,7 @@ async function main() {
 
         case 'startGame': {
           if (session && gameCode) {
-            await updateGameStats(session.players.length);
+            updateGameStats(session.players.length);
             
             const loopRounds = async () => {
               let dealerPosition = 0;
@@ -253,7 +343,7 @@ async function main() {
                     addedPlayers++;
                   }
                   broadcast(session, { type: 'players', players: session.players });
-                  await updateGameStats(session.players.length, addedPlayers);
+                  updateGameStats(session.players.length, addedPlayers);
                 }
                 
 
@@ -319,6 +409,7 @@ async function main() {
 
         case 'raise': {
           if (player && session) {
+            clearTurnReminder(session, player.name);
             const number = Math.max(data.minRaise, data.amount);
             player.respondToBet(number);
               socket.send(JSON.stringify({ type: 'player', player }));
@@ -329,6 +420,7 @@ async function main() {
 
         case 'call': {
           if (player && session && gameCode) {
+            clearTurnReminder(session, player.name);
             player.called = true;
             player.respondToBet(-1);
               socket.send(JSON.stringify({ type: 'player', player }));
@@ -340,6 +432,7 @@ async function main() {
 
         case 'fold': {
           if (player && session && gameCode) {
+            clearTurnReminder(session, player.name);
             player.respondToBet(-2);
             socket.send(JSON.stringify({ type: 'player', player }));
             broadcast(session, { type: 'players', players: session.players });
@@ -351,8 +444,9 @@ async function main() {
         case 'showLeftCard':
         case 'showRightCard':
         case 'showBothCards':
-        case 'showNone': {  if (player && session && session.game) {
-          // 1. Update player's show state
+        case 'showNone': {  
+          if (player && session && session.game) {
+          clearShowdownReminder(session, player.name);
           player.showLeftCard = data.type === 'showLeftCard';
           player.showRightCard = data.type === 'showRightCard';
           player.showBothCards = data.type === 'showBothCards';
