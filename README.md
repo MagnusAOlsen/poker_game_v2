@@ -51,7 +51,7 @@ This will take you to a welcome page where you can either create a new game or j
 
 7.  After each round you will have the opportunity to show one of the cards or both. After every player has chosen how many cards they want to show, the winner(s) of the round will be declared and their chips will increase with the pot size. But remember: Only the last player has the ability to show fewer than two cards and still win. If you click on a button with the color red you are automatically "folded".
 
-    ![image](readmePictures.jpg)
+    ![image](readmePictures/show_cards.jpg)
 
 ## Nice to know
 
