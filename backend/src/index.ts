@@ -133,7 +133,7 @@ async function playRound(session: Session, dealerPosition: number) {
             minRaise
           };
         },
-        4000
+        13000
       );
     };
   }
@@ -173,7 +173,7 @@ async function playRound(session: Session, dealerPosition: number) {
           type: 'showFoldedCards',
           isLastStanding
         }),
-        4000
+        6000
       );
   
       const actingPlayer = game.players.find((p: Player) => p.name === activePlayerName);
@@ -329,6 +329,7 @@ async function main() {
                   else if (player.addOn) {
                     player.chips = 150;
                     player.addOn = false;
+                    player.isOut = false;
                   }
                 }
 

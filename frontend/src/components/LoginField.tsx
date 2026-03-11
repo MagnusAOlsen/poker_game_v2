@@ -12,7 +12,7 @@ type LoginFieldProps = {
 function LoginField({ currentPlayers, gameCode }: LoginFieldProps) {
   const { language } = useLanguage();
 
-  const baseUrl = import.meta.env.VITE_API_URL || window.location.origin;
+  const baseUrl = window.location.origin;
   const joinUrl = `${baseUrl}/PlayerLogin?code=${gameCode}`;
 
   return (

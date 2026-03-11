@@ -89,6 +89,7 @@ docker-compose.override.yml
 *.bak
 *.tmp
 *.orig
+readmePictures/
 
 # Local credentials or secrets
 secrets.json
