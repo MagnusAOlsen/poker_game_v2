@@ -5,8 +5,6 @@ import http from 'http';
 import { Player } from "./gameLogic/Player.js";
 import { Game } from "./gameLogic/Game.js";
 import ip from 'ip';
-import { clear } from 'console';
-
 
 interface Session {
   host: WebSocket;
@@ -267,8 +265,7 @@ async function main() {
           if (session && gameCode) {
             session.host = socket;
             socketToGameCode.set(socket, gameCode);
-            socket.send(JSON.stringify({ type: 'gameCode', code: gameCode }));
-            socket.send(JSON.stringify({ type: 'players', players: session.players }));
+            socket.send(JSON.stringify({ type: 'gameCode', code: gameCode}));
             socket.send(JSON.stringify({ type: 'players', players: session.players }));
           }
           break;

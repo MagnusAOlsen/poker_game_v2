@@ -3,7 +3,7 @@ import "../components/styles/PlayerLogin.css";
 import Aces from "../components/Aces.tsx";
 import UserNameField from "../components/UsernameField.tsx";
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import AnimatedEllipsis from "../components/animatedEllipsis.tsx";
 import { useLanguage } from "../context/LanguageContext.tsx";
 import norwegianFlag from "../assets/Norge.png";
@@ -11,6 +11,7 @@ import americanFlag from "../assets/USA.png";
 
 function PlayerLogin() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [playerName, setPlayerName] = useState(() => {
     return sessionStorage.getItem("currentPlayer") || "";
   });
@@ -20,7 +21,11 @@ function PlayerLogin() {
   });
 
   const { language, toggleLanguage } = useLanguage();
-  const [gameCode, setGameCode] = useState("...");
+  const [gameCode, setGameCode] = useState(() => {
+    const urlCode = searchParams.get("code");
+    const storedCode = sessionStorage.getItem("gameCode");
+    return urlCode || storedCode || "...";
+  });
 
   const listOfAvatars: string[] = [
     "batman_logo",
@@ -45,14 +50,15 @@ function PlayerLogin() {
   const socketRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    const storedCode = sessionStorage.getItem("gameCode");
-    setGameCode(storedCode || "...");
-
-    if (!sessionStorage.getItem("ready")) {
-      sessionStorage.clear();
-    }
-    if (storedCode) {
-      sessionStorage.setItem("gameCode", storedCode);
+    const urlCode = searchParams.get("code");
+    if (urlCode) {
+      sessionStorage.setItem("gameCode", urlCode);
+      setGameCode(urlCode);
+    } else {
+      const storedCode = sessionStorage.getItem("gameCode");
+      if (storedCode) {
+        setGameCode(storedCode);
+      }
     }
 
     sessionStorage.setItem("ready", isReady.toString());
@@ -76,7 +82,6 @@ function PlayerLogin() {
   }, []);
 
   const handleSubmit = (name: string) => {
-    console.log("Sending Join Request -> Name:", name, "Code:", gameCode);
     if (!socketRef.current || !name) {
       return;
     }

@@ -2,6 +2,7 @@ import "./styles/LoginField.css";
 import type { Player } from "../types/Player";
 import AnimatedEllipsis from "./animatedEllipsis.tsx";
 import { useLanguage } from "../context/LanguageContext";
+import { QRCodeSVG } from "qrcode.react";
 
 type LoginFieldProps = {
   currentPlayers: Player[];
@@ -10,6 +11,9 @@ type LoginFieldProps = {
 
 function LoginField({ currentPlayers, gameCode }: LoginFieldProps) {
   const { language } = useLanguage();
+
+  const baseUrl = import.meta.env.VITE_API_URL || window.location.origin;
+  const joinUrl = `${baseUrl}/PlayerLogin?code=${gameCode}`;
 
   return (
     <>
@@ -24,7 +28,19 @@ function LoginField({ currentPlayers, gameCode }: LoginFieldProps) {
             {gameCode}
           </h1>
         )}
-        <img src="/qr-code.png" alt="QR Code" />
+        {gameCode !== "..." && (
+          <div
+            style={{
+              background: "white",
+              padding: "12px",
+              borderRadius: "12px",
+              display: "inline-block",
+            }}
+          >
+            <QRCodeSVG value={joinUrl} size={220} />
+          </div>
+        )}
+
         {language === "en" ? <h2>Current Players:</h2> : <h2>Spillere:</h2>}
         <ul>
           {currentPlayers.map((player, index) => (
