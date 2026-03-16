@@ -44,6 +44,7 @@ export class Game {
     for (let i = 0; i < 2; i++) {
       const activePlayers = this.players.filter(p => p.chips > 0);
         for (const player of activePlayers) {
+          player.participatingThisRound = true;
           const hand = this.deck.deal(1);
           player.receiveCards(hand);
         }
@@ -208,7 +209,7 @@ export class Game {
 
   rankPlayers(): Ranking[] {
     return this.players
-      .filter(p => !p.hasFolded)
+      .filter(p => p.participatingThisRound && !p.hasFolded)
       .map(player => {
         const bestHand = HandEvaluator.bestOfSeven([...player.hand, ...this.communityCards]);
         return { player, hand: bestHand };
@@ -236,7 +237,7 @@ export class Game {
 
 
   public async collectShowdownChoices(): Promise<void> {
-    const activePlayers = this.players.filter(p => !p.hasFolded);
+    const activePlayers = this.players.filter(p => p.participatingThisRound && !p.hasFolded);
     
     let startIndex: number;
     

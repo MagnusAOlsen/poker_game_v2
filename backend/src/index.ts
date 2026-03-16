@@ -149,7 +149,7 @@ async function playRound(session: Session, dealerPosition: number) {
   }
 
   const rankings = game.rankPlayers();
-  const activePlayers = game.players.filter(p => !p.hasFolded);
+  const activePlayers = game.players.filter(p => p.participatingThisRound && !p.hasFolded);
   const playersWhoActed: Player[] = [];
   let turnCounter = 0;
 
@@ -329,7 +329,6 @@ async function main() {
                   else if (player.addOn) {
                     player.chips = 150;
                     player.addOn = false;
-                    player.isOut = false;
                   }
                 }
 

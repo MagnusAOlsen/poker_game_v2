@@ -1,22 +1,4 @@
-/* import * as readline from 'readline'; */
 import { Card } from './Card.js';
-
-
-//Used to check the game logic in terminal
-/* function askQuestion(query: string): Promise<string> {
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
-  
-    return new Promise(resolve =>
-      rl.question(query, answer => {
-        rl.close();
-        resolve(answer);
-      })
-    );
-  } */
- 
 
 export class Player {
   hand: Card[] = [];
@@ -43,6 +25,7 @@ export class Player {
   public called: boolean = false;
   public winner: boolean = false;
   public gameCode?: string;
+  public participatingThisRound: boolean = false;
 
   constructor(name: string, startingChips: number = 150) {
     this.name = name;
@@ -134,5 +117,6 @@ export class Player {
     this.showBothCards = false;
     this.showNone = false;
     this.winner = false;
+    this.participatingThisRound = false;
   }
 }
