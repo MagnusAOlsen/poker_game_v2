@@ -61,12 +61,26 @@
   }
   
   .card-row {
+    position: relative;
     display: flex;
     justify-content: center;
     gap: 10px;
     margin-bottom: 15px;
     width: 100%;
   }
+  
+  .fold-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(254, 0, 0, 0.3); /* Semi-transparent red */
+    pointer-events: none; /* Allow clicks to pass through */
+    border-radius: 8px; /* Match card-row border if you have one */
+    z-index: 1;
+  }
+  
   
   .card-img {
     width: 42vw;

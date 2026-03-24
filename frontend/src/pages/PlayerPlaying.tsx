@@ -121,7 +121,7 @@ function PlayerPlaying() {
           {myPlayer?.name}: {myPlayer?.chips} kr
         </h1>
       </div>
-      <div className="card-row">
+      <div className={`card-row`}>
         {myPlayer?.hand?.map((card: Card, i: number) => (
           <img
             key={i}
@@ -130,6 +130,8 @@ function PlayerPlaying() {
             alt={`Card ${i}`}
           />
         ))}
+
+        {myPlayer?.hasFolded && <div className="fold-overlay" />}
       </div>
       {showInfo && (
         <div

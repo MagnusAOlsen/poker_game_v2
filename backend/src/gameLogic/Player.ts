@@ -100,7 +100,6 @@ export class Player {
 
 
   fold(): void {
-    this.hand = [];
     this.hasFolded = true;
   }
 
