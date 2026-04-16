@@ -60,10 +60,10 @@ function HostWaiting() {
     return () => socket.close();
   }, []);
 
-  const startGame = () => {
+  const startGame = (chips: number) => {
     if (socketRef.current) {
       socketRef.current.send(
-        JSON.stringify({ type: "startGame", gameCode: gameCode })
+        JSON.stringify({ type: "startGame", gameCode: gameCode, startingChips: chips })
       );
     }
   };

@@ -310,7 +310,14 @@ async function main() {
         case 'startGame': {
           if (session && gameCode) {
             updateGameStats(session.players.length);
-            
+
+            const startingChips: number = typeof data.startingChips === 'number' && data.startingChips > 0
+              ? data.startingChips
+              : 150;
+            for (const player of session.players) {
+              player.chips = startingChips;
+            }
+
             const loopRounds = async () => {
               let dealerPosition = 0;
               while (true) {
