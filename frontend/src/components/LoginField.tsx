@@ -44,7 +44,16 @@ function LoginField({ currentPlayers, gameCode }: LoginFieldProps) {
         {language === "en" ? <h2>Current Players:</h2> : <h2>Spillere:</h2>}
         <ul>
           {currentPlayers.map((player, index) => (
-            <li key={index}>{player.name}</li>
+            <li key={index} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+              {player.avatar && (
+                <img
+                  src={`../avatars/${player.avatar}.png`}
+                  alt={player.avatar}
+                  style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover" }}
+                />
+              )}
+              {player.name}
+            </li>
           ))}
         </ul>
         {currentPlayers.length < 7 && (
