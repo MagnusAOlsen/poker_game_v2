@@ -5,9 +5,8 @@ import UserNameField from "../components/UsernameField.tsx";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import AnimatedEllipsis from "../components/animatedEllipsis.tsx";
-import { useLanguage } from "../context/LanguageContext.tsx";
-import norwegianFlag from "../assets/Norge.png";
-import americanFlag from "../assets/USA.png";
+import { useT } from "../i18n/translations";
+import LanguageButton from "../components/LanguageButton.tsx";
 
 function PlayerLogin() {
   const navigate = useNavigate();
@@ -20,7 +19,7 @@ function PlayerLogin() {
     return sessionStorage.getItem("avatar") || "";
   });
 
-  const { language, toggleLanguage } = useLanguage();
+  const t = useT();
   const [gameCode, setGameCode] = useState(() => {
     const urlCode = searchParams.get("code");
     const storedCode = sessionStorage.getItem("gameCode");
@@ -128,13 +127,7 @@ function PlayerLogin() {
       </div>
 
       <div className="languageButton">
-        <button onClick={toggleLanguage} className="language-button">
-          {language === "no" ? (
-            <img src={norwegianFlag} alt="flag" />
-          ) : (
-            <img src={americanFlag} alt="flag" />
-          )}
-        </button>
+        <LanguageButton variant="player" />
       </div>
 
       {!isReady ? (
@@ -144,14 +137,12 @@ function PlayerLogin() {
       ) : (
         <div className="player-ready-wrapper">
           <h2 className="player-ready-title">
-            {language === "en"
-              ? `${playerName} ready to play!`
-              : `${playerName} klar for spill!`}
+            {t.readyToPlay(playerName)}
           </h2>
 
           {avatar === "" ? (
             <div>
-              <p>{language === "en" ? "Choose avatar" : "velg avatar"}</p>
+              <p>{t.chooseAvatar}</p>
               <div className="avatar-controls">
                 <button
                   onClick={() => viewAvatar(-1)}
@@ -169,7 +160,7 @@ function PlayerLogin() {
                 </button>
               </div>
               <button onClick={chooseAvatar} className="choose-avatar-button">
-                {language === "en" ? "Choose" : "Velg"}
+                {t.choose}
               </button>
             </div>
           ) : (
@@ -184,17 +175,13 @@ function PlayerLogin() {
 
           {!waitingMessage && avatar !== "" && (
             <p className="waiting-text">
-              {language === "en"
-                ? `Waiting for the host to start the game`
-                : `Venter på at spillet skal starte`}
+              {t.waitingForHost}
               <AnimatedEllipsis />
             </p>
           )}
           {waitingMessage && avatar !== "" && (
             <p className="waiting-text">
-              {language === "en"
-                ? `The game is full, waiting for players to leave`
-                : `Spillet er fullt, venter på ledig plass is spillet`}
+              {t.gameFull}
               <AnimatedEllipsis />
             </p>
           )}

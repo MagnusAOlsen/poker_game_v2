@@ -1,7 +1,7 @@
 import "./styles/LoginField.css";
 import type { Player } from "../types/Player";
 import AnimatedEllipsis from "./animatedEllipsis.tsx";
-import { useLanguage } from "../context/LanguageContext";
+import { useT } from "../i18n/translations";
 import { QRCodeSVG } from "qrcode.react";
 
 type LoginFieldProps = {
@@ -10,7 +10,7 @@ type LoginFieldProps = {
 };
 
 function LoginField({ currentPlayers, gameCode }: LoginFieldProps) {
-  const { language } = useLanguage();
+  const t = useT();
 
   const baseUrl = window.location.origin;
   const joinUrl = `${baseUrl}/PlayerLogin?code=${gameCode}`;
@@ -18,16 +18,7 @@ function LoginField({ currentPlayers, gameCode }: LoginFieldProps) {
   return (
     <>
       <div className="login-field">
-        {language === "en" ? (
-          <h1>
-            Scan QR-code to join or use the game code! Game code: {gameCode}
-          </h1>
-        ) : (
-          <h1>
-            Skann QR-koden for å bli med eller bruk spillkoden! Spillkode:{" "}
-            {gameCode}
-          </h1>
-        )}
+        <h1>{t.scanQr} {gameCode}</h1>
         {gameCode !== "..." && (
           <div
             style={{
@@ -41,7 +32,7 @@ function LoginField({ currentPlayers, gameCode }: LoginFieldProps) {
           </div>
         )}
 
-        {language === "en" ? <h2>Current Players:</h2> : <h2>Spillere:</h2>}
+        <h2>{t.currentPlayers}</h2>
         <ul>
           {currentPlayers.map((player, index) => (
             <li key={index} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
@@ -58,18 +49,11 @@ function LoginField({ currentPlayers, gameCode }: LoginFieldProps) {
         </ul>
         {currentPlayers.length < 7 && (
           <p>
-            {language === "en"
-              ? "Waiting for players to join"
-              : "Venter på at spillere skal bli med"}
+            {t.waitingForPlayers}
             <AnimatedEllipsis />
           </p>
         )}
-        {currentPlayers.length === 7 &&
-          (language === "en" ? (
-            <p>Lobby full! Let's start</p>
-          ) : (
-            <p>Lobby er full! La oss starte</p>
-          ))}
+        {currentPlayers.length === 7 && <p>{t.lobbyFull}</p>}
       </div>
       <button className="startGame" />
     </>

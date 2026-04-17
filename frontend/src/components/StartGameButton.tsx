@@ -3,7 +3,7 @@ import startIcon from "../assets/play_button.png";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Player } from "../types/Player";
-import { useLanguage } from "../context/LanguageContext";
+import { useT } from "../i18n/translations";
 
 type Props = {
   currentPlayers: Player[];
@@ -12,7 +12,7 @@ type Props = {
 
 function StartGameButton({ currentPlayers, onStartGame }: Props) {
   const navigate = useNavigate();
-  const { language } = useLanguage();
+  const t = useT();
   const [showModal, setShowModal] = useState(false);
   const [startingChips, setStartingChips] = useState(500);
 
@@ -74,7 +74,7 @@ function StartGameButton({ currentPlayers, onStartGame }: Props) {
             }}
           >
             <h2 style={{ marginTop: 0, marginBottom: "20px" }}>
-              {language === "en" ? "Game Settings" : "Spillinnstillinger"}
+              {t.gameSettings}
             </h2>
 
             <div
@@ -87,12 +87,10 @@ function StartGameButton({ currentPlayers, onStartGame }: Props) {
               }}
             >
               <p style={{ margin: "4px 0" }}>
-                {language === "en" ? "Small blind:" : "Liten blind:"}{" "}
-                <strong>1 chip</strong>
+                {t.smallBlind} <strong>1 chip</strong>
               </p>
               <p style={{ margin: "4px 0" }}>
-                {language === "en" ? "Big blind:" : "Stor blind:"}{" "}
-                <strong>2 chips</strong>
+                {t.bigBlind} <strong>2 chips</strong>
               </p>
             </div>
 
@@ -103,8 +101,7 @@ function StartGameButton({ currentPlayers, onStartGame }: Props) {
                 fontSize: "1rem",
               }}
             >
-              {language === "en" ? "Starting stack:" : "Startstack:"}{" "}
-              <strong>{startingChips} chips</strong>
+              {t.startingStack} <strong>{startingChips} chips</strong>
             </label>
             <input
               type="range"
@@ -124,14 +121,14 @@ function StartGameButton({ currentPlayers, onStartGame }: Props) {
                 className="fold-leave-button"
                 style={{ width: "120px", margin: 0 }}
               >
-                {language === "en" ? "Cancel" : "Avbryt"}
+                {t.cancel}
               </button>
               <button
                 onClick={handleConfirm}
                 className="action-button"
                 style={{ width: "120px", margin: 0 }}
               >
-                {language === "en" ? "Start" : "Start"}
+                {t.start}
               </button>
             </div>
           </div>
