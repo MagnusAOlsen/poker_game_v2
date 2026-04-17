@@ -5,7 +5,7 @@ import type { Player } from "../types/Player";
 import type { Card } from "../types/Card";
 import thePot from "../assets/poker_chips.png";
 import ShuffleAnimation from "./ShuffleAnimation.tsx";
-import { useLanguage } from "../context/LanguageContext.tsx";
+import { useT } from "../i18n/translations";
 
 type PlayingProps = {
   playersPlaying: Player[];
@@ -24,7 +24,7 @@ function Playing({
 }: PlayingProps) {
   const centerX = 800;
   const centerY = 440;
-  const { language } = useLanguage();
+  const t = useT();
   const curveRadiusX = 150;
   const curveRadiusY = 190;
   const bottomPlayerSpacing = 320;
@@ -116,9 +116,7 @@ function Playing({
               border: "2px solid #FFD700",
             }}
           >
-            {language === "en"
-              ? "Game code: " + gameCode
-              : "Spillkode: " + gameCode}
+            {t.gameCodeLabel} {gameCode}
           </div>
         </>
       )}

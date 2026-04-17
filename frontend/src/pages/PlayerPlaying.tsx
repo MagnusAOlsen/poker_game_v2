@@ -4,15 +4,14 @@ import type { Player } from "../types/Player";
 import SliderInput from "../components/SliderInput";
 import { useState, useEffect, useRef } from "react";
 import type { Card } from "../types/Card";
-import { useLanguage } from "../context/LanguageContext";
-import norwegianFlag from "../assets/Norge.png";
-import americanFlag from "../assets/USA.png";
+import { useT } from "../i18n/translations";
+import LanguageButton from "../components/LanguageButton";
 import handRanking from "../assets/hand_ranking.png";
 
 function PlayerPlaying() {
   const socketRef = useRef<WebSocket | null>(null);
   const playerNameRef = useRef<string | null>(null);
-  const { language, toggleLanguage } = useLanguage();
+  const t = useT();
 
   const [myPlayer, setMyPlayer] = useState<Player | null>(null);
   const [isMyTurnMessage, setIsMyTurnMessage] = useState(false);
@@ -105,13 +104,7 @@ function PlayerPlaying() {
   return (
     <div className="player-playing-container">
       <div className="top-bar">
-        <button onClick={toggleLanguage} className="language-toggle-button">
-          <img
-            src={language === "no" ? norwegianFlag : americanFlag}
-            alt="Language Flag"
-            className="flag-img"
-          />
-        </button>
+        <LanguageButton variant="player" />
         <img
           src={`../avatars/${myPlayer?.avatar}.png`}
           alt="Avatar"
@@ -156,19 +149,19 @@ function PlayerPlaying() {
       {canAct && (
         <div className="action-buttons">
           <button onClick={() => sendMove("call")} className="action-button">
-            {language === "en" ? "Call" : "Syn"}
+            {t.call}
           </button>
           <button
             onClick={() => setIsRaiseActive(true)}
             className="action-button"
           >
-            {language === "en" ? "Raise" : "Høyne"}
+            {t.raise}
           </button>
           <button
             onClick={() => sendMove("fold")}
             className="fold-leave-button"
           >
-            {language === "en" ? "Fold" : "Kast"}
+            {t.fold}
           </button>
         </div>
       )}
@@ -176,20 +169,14 @@ function PlayerPlaying() {
         <div className="buyin-leave-buttons">
           {myPlayer.chips < 150 && (
             <button onClick={() => sendMove("addOn")} className="action-button">
-              {language === "en"
-                ? myPlayer && myPlayer.chips === 0
-                  ? "Rebuy to 150 kr"
-                  : "Add-on to 150 kr"
-                : myPlayer?.chips === 0
-                  ? "Kjøp deg inn for 150 kr"
-                  : "Kjøp deg opp til 150 kr"}
+              {myPlayer?.chips === 0 ? t.rebuy : t.addOn}
             </button>
           )}
           <button
             onClick={() => sendMove("leave")}
             className="fold-leave-button"
           >
-            {language === "en" ? "Leave Game" : "Forlat Spill"}
+            {t.leaveGame}
           </button>
         </div>
       )}
@@ -199,7 +186,7 @@ function PlayerPlaying() {
             onClick={() => setShowInfo(!showInfo)}
             className="action-button"
           >
-            {language === "en" ? "Hand ranking" : "Rangering av hånd"}
+            {t.handRanking}
           </button>
         </div>
       )}
@@ -210,26 +197,26 @@ function PlayerPlaying() {
             onClick={() => sendShownCards("showBothCards")}
             className="action-button"
           >
-            {language === "en" ? "Show both cards" : "Vis begge kort"}
+            {t.showBothCards}
           </button>
           <button
             onClick={() => sendShownCards("showLeftCard")}
             className={isLastStanding ? "action-button" : "fold-leave-button"}
           >
-            {language === "en" ? "Show left card" : "Vis venstre kort"}
+            {t.showLeftCard}
           </button>
           <button
             onClick={() => sendShownCards("showRightCard")}
             className={isLastStanding ? "action-button" : "fold-leave-button"}
           >
-            {language === "en" ? "Show right card" : "Vis høyre kort"}
+            {t.showRightCard}
           </button>
 
           <button
             onClick={() => sendShownCards("showNone")}
             className={isLastStanding ? "action-button" : "fold-leave-button"}
           >
-            {language === "en" ? "Show none" : "Ikke vis kort"}
+            {t.showNone}
           </button>
         </div>
       )}

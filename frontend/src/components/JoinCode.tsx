@@ -1,10 +1,10 @@
-import { useLanguage } from "../context/LanguageContext";
+import { useT } from "../i18n/translations";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 function JoinCode() {
   const navigate = useNavigate();
-  const { language } = useLanguage();
+  const t = useT();
   const [code, setCode] = useState("");
   return (
     <div
@@ -30,16 +30,14 @@ function JoinCode() {
           marginLeft: "10px",
         }}
       >
-        {language === "en"
-          ? "Enter the join code or scan QR code:"
-          : "Skriv inn kode eller skann QR-kode:"}
+        {t.enterJoinCode}
       </h1>
 
       {/* Inner container for side-by-side Input and Button */}
       <div style={{ display: "flex", flexDirection: "row", gap: "10px" }}>
         <input
           type="text"
-          placeholder={language === "en" ? "Join Code" : "Kode"}
+          placeholder={t.joinCodePlaceholder}
           value={code}
           onChange={(e) => setCode(e.target.value)}
           style={{
@@ -73,7 +71,7 @@ function JoinCode() {
             }
           }}
         >
-          {language === "en" ? "Join" : "Bli med"}
+          {t.join}
         </button>
       </div>
     </div>

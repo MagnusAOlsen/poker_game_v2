@@ -2,7 +2,7 @@ import "./styles/SliderInput.css";
 import "./styles/General.css";
 import { useState } from "react";
 import type { ChangeEvent } from "react";
-import { useLanguage } from "../context/LanguageContext";
+import { useT } from "../i18n/translations";
 
 type SliderInputProps = {
   min?: number;
@@ -35,7 +35,7 @@ function SliderInput({
     onReject?.();
   };
 
-  const { language } = useLanguage();
+  const t = useT();
 
   return (
     <div style={{ width: "100%", marginRight: "10%" }}>
@@ -45,7 +45,7 @@ function SliderInput({
           fontSize: "1.2rem",
         }}
       >
-        {language === "en" ? "Value: " + value : "Verdi: " + value}
+        {t.value} {value}
       </label>
       <input
         id="slider"
@@ -57,9 +57,7 @@ function SliderInput({
         style={{ width: "100%", height: "40px" }}
       />
       <label htmlFor="writeIn" style={{ fontSize: "1.2rem" }}>
-        {language === "en"
-          ? "Or enter value manually (between " + min + " and " + max + "):"
-          : `Eller skriv inn et tall (mellom ${min} og ${max}):`}
+        {t.enterManually(min ?? 0, max ?? 0)}
       </label>
       <input
         id="writeIn"
@@ -80,12 +78,10 @@ function SliderInput({
       />
       <div className="Buttons-on-raise">
         <button onClick={handleConfirm} className="action-button">
-          {language === "en" ? "Confirm bet" : "Bekreft innsats"}
+          {t.confirmBet}
         </button>
         <button onClick={handleReject} className="action-button">
-          {language === "en"
-            ? "Go back to call/fold"
-            : "Gå tilbake til syn/kast"}
+          {t.backToCallFold}
         </button>
       </div>
     </div>
