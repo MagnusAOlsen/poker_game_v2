@@ -1,11 +1,11 @@
 // src/contexts/LanguageContext.tsx
 import { createContext, useContext, useState } from "react";
 
-type Language = "en" | "no";
+export type Language = "en" | "no" | "es" | "fr" | "it" | "cn" | "jp" | "de";
 
 type LanguageContextType = {
   language: Language;
-  toggleLanguage: () => void;
+  setLanguage: (lang: Language) => void;
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(
@@ -15,18 +15,17 @@ const LanguageContext = createContext<LanguageContextType | undefined>(
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [language, setLanguage] = useState<Language>(() => {
+  const [language, setLanguageState] = useState<Language>(() => {
     return (sessionStorage.getItem("language") as Language) || "en";
   });
 
-  const toggleLanguage = () => {
-    const newLang = language === "en" ? "no" : "en";
-    setLanguage(newLang);
-    sessionStorage.setItem("language", newLang); // persist between refreshes
+  const setLanguage = (lang: Language) => {
+    setLanguageState(lang);
+    sessionStorage.setItem("language", lang);
   };
 
   return (
-    <LanguageContext.Provider value={{ language, toggleLanguage }}>
+    <LanguageContext.Provider value={{ language, setLanguage }}>
       {children}
     </LanguageContext.Provider>
   );

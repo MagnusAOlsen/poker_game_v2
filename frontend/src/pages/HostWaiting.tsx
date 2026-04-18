@@ -6,7 +6,7 @@ import StartGameButton from "../components/StartGameButton";
 import MusicButton from "../components/MusicButton";
 import type { Player } from "../types/Player";
 import LanguageButton from "../components/LanguageButton";
-import { useLanguage } from "../context/LanguageContext";
+import { useT } from "../i18n/translations";
 
 function HostWaiting() {
   const [currentPlayers, setCurrentPlayers] = useState<Player[]>(() => {
@@ -23,7 +23,7 @@ function HostWaiting() {
     return sessionStorage.getItem("gameCode") || "...";
   });
 
-  const { language } = useLanguage();
+  const t = useT();
 
   const socketRef = useRef<WebSocket | null>(null);
   const hasRequestedCode = useRef(false);
@@ -60,10 +60,10 @@ function HostWaiting() {
     return () => socket.close();
   }, []);
 
-  const startGame = () => {
+  const startGame = (chips: number) => {
     if (socketRef.current) {
       socketRef.current.send(
-        JSON.stringify({ type: "startGame", gameCode: gameCode })
+        JSON.stringify({ type: "startGame", gameCode: gameCode, startingChips: chips })
       );
     }
   };
@@ -77,7 +77,7 @@ function HostWaiting() {
         <PokerBackground />
         <LoginField currentPlayers={currentPlayers} gameCode={gameCode} />
         <div className="player-list">
-          {language === "en" ? <h2>Current Players</h2> : <h2>Spillere</h2>}
+          <h2>{t.currentPlayersShort}</h2>
 
           <ul>
             {currentPlayers.map((player, i) => (
