@@ -14,6 +14,7 @@ interface Session {
   waitingPlayers: Player[];
   turnReminders: Map<string, NodeJS.Timeout>;
   showdownReminders: Map<string, NodeJS.Timeout>;
+  startingChips: number;
 }
 
 async function broadcast(session: Session, message: any) {
@@ -251,7 +252,8 @@ async function main() {
             game: null,
             waitingPlayers: [],
             turnReminders: new Map(),
-            showdownReminders: new Map()
+            showdownReminders: new Map(),
+            startingChips: 150,
           };
           sessions.set(code, newSession);
           socketToGameCode.set(socket, code);
@@ -311,11 +313,11 @@ async function main() {
           if (session && gameCode) {
             updateGameStats(session.players.length);
 
-            const startingChips: number = typeof data.startingChips === 'number' && data.startingChips > 0
+            session.startingChips = typeof data.startingChips === 'number' && data.startingChips > 0
               ? data.startingChips
               : 150;
             for (const player of session.players) {
-              player.chips = startingChips;
+              player.chips = session.startingChips;
             }
 
             const loopRounds = async () => {
@@ -334,7 +336,7 @@ async function main() {
                     }
                   }
                   else if (player.addOn) {
-                    player.chips = 150;
+                    player.chips = session.startingChips;
                     player.addOn = false;
                   }
                 }
@@ -354,7 +356,7 @@ async function main() {
                 const activePlayerNames = session.players.map(p => p.name);
                 for (const [socket, name] of session.clients.entries()) {
                   if (activePlayerNames.includes(name) && socket.readyState === WebSocket.OPEN) {
-                    socket.send(JSON.stringify({ type: 'gameStarted' }));
+                    socket.send(JSON.stringify({ type: 'gameStarted', startingChips: session.startingChips }));
                     }
                   }
                 for (const waitingPlayer of session.waitingPlayers) {

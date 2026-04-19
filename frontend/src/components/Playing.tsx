@@ -154,7 +154,7 @@ function Playing({
             <div
               style={{ color: "white", fontWeight: "bold", fontSize: "45px" }}
             >
-              {potSize} kr
+              {potSize}
             </div>
           </div>
         )}

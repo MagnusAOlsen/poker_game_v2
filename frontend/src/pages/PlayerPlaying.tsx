@@ -7,6 +7,8 @@ import type { Card } from "../types/Card";
 import { useT } from "../i18n/translations";
 import LanguageButton from "../components/LanguageButton";
 import handRanking from "../assets/hand_ranking.png";
+import GetMoreChips from "../components/getMoreChips";
+import LeaveGame from "../components/leaveGame";
 
 function PlayerPlaying() {
   const socketRef = useRef<WebSocket | null>(null);
@@ -20,6 +22,9 @@ function PlayerPlaying() {
   const [showInfo, setShowInfo] = useState(false);
   const [isLastStanding, setIsLastStanding] = useState(false);
   const [minRaise, setMinRaise] = useState(0);
+  const [startStack, setStartStack] = useState(150);
+  const [showGetMoreChips, setShowGetMoreChips] = useState(false);
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
 
   const canAct =
     isMyTurnMessage &&
@@ -74,6 +79,8 @@ function PlayerPlaying() {
       } else if (data.type === "showFoldedCards") {
         setIsLastStanding(data.isLastStanding);
         setShowFoldedCards(true);
+      } else if (data.type === "gameStarted") {
+        if (data.startingChips) setStartStack(data.startingChips);
       }
     };
 
@@ -111,7 +118,7 @@ function PlayerPlaying() {
           className="avatar-img"
         />
         <h1 className="player-name">
-          {myPlayer?.name}: {myPlayer?.chips} kr
+          {myPlayer?.name}: {myPlayer?.chips}
         </h1>
       </div>
       <div className={`card-row`}>
@@ -167,18 +174,49 @@ function PlayerPlaying() {
       )}
       {buyInorLeave && (
         <div className="buyin-leave-buttons">
-          {myPlayer.chips < 150 && (
-            <button onClick={() => sendMove("addOn")} className="action-button">
-              {myPlayer?.chips === 0 ? t.rebuy : t.addOn}
+          {myPlayer.chips < startStack && (
+            <button
+              onClick={() => setShowGetMoreChips(true)}
+              className="action-button"
+            >
+              {myPlayer?.chips === 0
+                ? t.rebuy + startStack
+                : t.addOn + startStack}
             </button>
           )}
           <button
-            onClick={() => sendMove("leave")}
+            onClick={() => setShowLeaveConfirm(true)}
             className="fold-leave-button"
           >
             {t.leaveGame}
           </button>
         </div>
+      )}
+      {showGetMoreChips && (
+        <GetMoreChips
+          text={t.getMoreChipsText(startStack)}
+          confirmLabel={
+            myPlayer?.chips === 0 ? t.rebuy + startStack : t.addOn + startStack
+          }
+          cancelLabel={t.cancel}
+          onConfirm={() => {
+            sendMove("addOn");
+            setShowGetMoreChips(false);
+          }}
+          onCancel={() => setShowGetMoreChips(false)}
+        />
+      )}
+      {showLeaveConfirm && (
+        <LeaveGame
+          text={t.leaveGameText}
+          confirmLabel={t.leaveGame}
+          cancelLabel={t.cancel}
+          onConfirm={() => {
+            sendMove("leave");
+            setShowLeaveConfirm(false);
+          }}
+          onCancel={() => setShowLeaveConfirm(false)}
+        />
       )}
       {!isRaiseActive && (
         <div className="info-button">

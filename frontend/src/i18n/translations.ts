@@ -37,8 +37,8 @@ export const translations = {
     call: "Call",
     raise: "Raise",
     fold: "Fold",
-    rebuy: "Rebuy to 150 kr",
-    addOn: "Add-on to 150 kr",
+    rebuy: "Rebuy to ",
+    addOn: "Add-on to ",
     leaveGame: "Leave Game",
     handRanking: "Hand ranking",
     showBothCards: "Show both cards",
@@ -51,6 +51,8 @@ export const translations = {
     choose: "Choose",
     waitingForHost: "Waiting for the host to start the game",
     gameFull: "The game is full, waiting for players to leave",
+    getMoreChipsText: (n: number) => `Your chipcount will be ${n} for the next round`,
+    leaveGameText: "You will leave after this round. If you are still in the hand, wait to leave until you have folded.",
   },
 
   no: {
@@ -80,8 +82,8 @@ export const translations = {
     call: "Syn",
     raise: "Høyne",
     fold: "Kast",
-    rebuy: "Kjøp deg inn for 150 kr",
-    addOn: "Kjøp deg opp til 150 kr",
+    rebuy: "Kjøp deg inn for ",
+    addOn: "Kjøp deg opp til ",
     leaveGame: "Forlat Spill",
     handRanking: "Rangering av hånd",
     showBothCards: "Vis begge kort",
@@ -93,6 +95,8 @@ export const translations = {
     choose: "Velg",
     waitingForHost: "Venter på at spillet skal starte",
     gameFull: "Spillet er fullt, venter på ledig plass i spillet",
+    getMoreChipsText: (n: number) => `Din stackstørrelse vil være ${n} ved neste runde`,
+    leaveGameText: "Du forlater etter denne runden. Hvis du fortsatt er med i hånden, vent til du har kastet.",
   },
 
   es: {
@@ -122,8 +126,8 @@ export const translations = {
     call: "Igualar",
     raise: "Subir",
     fold: "Retirarse",
-    rebuy: "Recompra a 150",
-    addOn: "Añadir a 150",
+    rebuy: "Recompra a ",
+    addOn: "Añadir a ",
     leaveGame: "Abandonar",
     handRanking: "Ranking de manos",
     showBothCards: "Mostrar ambas cartas",
@@ -135,6 +139,8 @@ export const translations = {
     choose: "Elegir",
     waitingForHost: "Esperando que el anfitrión inicie",
     gameFull: "La partida está llena, esperando a que salga alguien",
+    getMoreChipsText: (n: number) => `Tu stack será ${n} en la próxima ronda`,
+    leaveGameText: "Abandonarás después de esta ronda. Si todavía estás en la mano, espera a retirarte.",
   },
 
   fr: {
@@ -164,8 +170,8 @@ export const translations = {
     call: "Suivre",
     raise: "Relancer",
     fold: "Se coucher",
-    rebuy: "Rechat à 150",
-    addOn: "Compléter à 150",
+    rebuy: "Rechat à ",
+    addOn: "Compléter à ",
     leaveGame: "Quitter",
     handRanking: "Classement des mains",
     showBothCards: "Montrer les deux cartes",
@@ -177,6 +183,8 @@ export const translations = {
     choose: "Choisir",
     waitingForHost: "En attente que l'hôte démarre",
     gameFull: "La partie est pleine, en attente d'une place",
+    getMoreChipsText: (n: number) => `Votre stack sera de ${n} au prochain tour`,
+    leaveGameText: "Vous partirez après cette manche. Si vous êtes encore dans la main, attendez de vous coucher.",
   },
 
   it: {
@@ -206,8 +214,8 @@ export const translations = {
     call: "Chiama",
     raise: "Rilancia",
     fold: "Fold",
-    rebuy: "Riacquisto a 150",
-    addOn: "Aggiungi a 150",
+    rebuy: "Riacquisto a ",
+    addOn: "Aggiungi a ",
     leaveGame: "Abbandona",
     handRanking: "Classifica mani",
     showBothCards: "Mostra entrambe le carte",
@@ -219,6 +227,8 @@ export const translations = {
     choose: "Scegli",
     waitingForHost: "In attesa che l'host inizi",
     gameFull: "La partita è piena, in attesa di un posto",
+    getMoreChipsText: (n: number) => `Il tuo stack sarà ${n} al prossimo round`,
+    leaveGameText: "Uscirai dopo questa mano. Se sei ancora nel gioco, aspetta di fare fold.",
   },
 
   cn: {
@@ -248,8 +258,8 @@ export const translations = {
     call: "跟注",
     raise: "加注",
     fold: "弃牌",
-    rebuy: "重新买入 150",
-    addOn: "补足至 150",
+    rebuy: "重新买入 ",
+    addOn: "补足至 ",
     leaveGame: "离开游戏",
     handRanking: "牌型排名",
     showBothCards: "显示两张牌",
@@ -261,6 +271,8 @@ export const translations = {
     choose: "选择",
     waitingForHost: "等待主持人开始游戏",
     gameFull: "游戏已满，等待玩家离开",
+    getMoreChipsText: (n: number) => `下一局您的筹码将为 ${n}`,
+    leaveGameText: "您将在本局结束后离开。如果您仍在手牌中，请等待弃牌后再离开。",
   },
 
   de: {
@@ -290,8 +302,8 @@ export const translations = {
     call: "Mitgehen",
     raise: "Erhöhen",
     fold: "Passen",
-    rebuy: "Rebuy auf 150",
-    addOn: "Aufstocken auf 150",
+    rebuy: "Rebuy auf ",
+    addOn: "Aufstocken auf ",
     leaveGame: "Spiel verlassen",
     handRanking: "Handreihenfolge",
     showBothCards: "Beide Karten zeigen",
@@ -303,6 +315,8 @@ export const translations = {
     choose: "Wählen",
     waitingForHost: "Warten auf den Host",
     gameFull: "Spiel voll, warten auf freien Platz",
+    getMoreChipsText: (n: number) => `Dein Stack wird in der nächsten Runde ${n} sein`,
+    leaveGameText: "Du verlässt nach dieser Runde. Wenn du noch im Spiel bist, warte bis du gepasst hast.",
   },
 
   jp: {
@@ -332,8 +346,8 @@ export const translations = {
     call: "コール",
     raise: "レイズ",
     fold: "フォールド",
-    rebuy: "150にリバイ",
-    addOn: "150にアドオン",
+    rebuy: "にリバイ",
+    addOn: "にアドオン",
     leaveGame: "ゲームを去る",
     handRanking: "ハンドランキング",
     showBothCards: "両方のカードを見せる",
@@ -345,6 +359,8 @@ export const translations = {
     choose: "選択",
     waitingForHost: "ホストがゲームを開始するのを待っています",
     gameFull: "ゲームは満員です。プレイヤーが抜けるのを待っています",
+    getMoreChipsText: (n: number) => `次のラウンドのチップ数は ${n} になります`,
+    leaveGameText: "このラウンド終了後に退出します。まだハンドに参加している場合は、フォールドしてから退出してください。",
   },
 } as const;
 

@@ -26,7 +26,7 @@ function PlayerOnBoard({ x, y, player }: PlayerProps) {
       {player.currentBet > 0 && (
         <div className="bet-box">
           <img src={poker_chips} />
-          <p>{player.currentBet} kr</p>
+          <p>{player.currentBet}</p>
         </div>
       )}
       {player.called === true && player.currentBet === 0 && (
@@ -109,7 +109,7 @@ function PlayerOnBoard({ x, y, player }: PlayerProps) {
 
         <div className="chips-status">
           <img src={poker_chips} />
-          <h2>{player.chips} kr</h2>
+          <h2>{player.chips}</h2>
         </div>
       </div>
     </div>
