@@ -125,8 +125,8 @@ async function updateTotalGameStats(playerCount: number, newPlayersAdded?:number
 }
 
 
-export function updateGameStats(playerCount: number, newPlayersAdded?:number) {
+export function updateGameStats(playerCount: number, newPlayersAdded?: number) {
+  if (mongoose.connection.readyState !== 1) return;
   updateDailyGameStats(playerCount, newPlayersAdded);
   updateTotalGameStats(playerCount, newPlayersAdded);
- 
 }
