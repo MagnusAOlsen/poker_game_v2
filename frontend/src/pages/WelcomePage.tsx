@@ -38,6 +38,9 @@ function WelcomePage() {
         <LanguageButton />
         <MusicButton />
       </div>
+      <p style={{ position: "absolute", bottom: 8, left: 10, zIndex: 10, fontSize: 11, color: "#000", margin: 0 }}>
+        Image by Freepik
+      </p>
     </>
   );
 }

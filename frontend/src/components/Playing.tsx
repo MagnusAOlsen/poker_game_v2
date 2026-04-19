@@ -139,7 +139,7 @@ function Playing({
           <img
             key={i}
             src={getCardImage(card)}
-            style={{ width: "120px", marginRight: "10px" }}
+            style={{ width: "130px", marginRight: "10px" }}
           />
         ))}
         {potSize > 0 && (

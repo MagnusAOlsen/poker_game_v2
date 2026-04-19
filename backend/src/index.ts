@@ -372,7 +372,7 @@ async function main() {
                 session.game = game;
                 await playRound(session, dealerPosition);
             
-                await new Promise(resolve => setTimeout(resolve, 3000));
+                await new Promise(resolve => setTimeout(resolve, 7500));
 
                 
 
