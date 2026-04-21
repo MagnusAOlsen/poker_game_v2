@@ -36,7 +36,7 @@ export class Game {
     this.deck.reset();
     this.deck.shuffle();
     this.players.forEach(player => player.resetHand());
-    this.dealerPostion = dealerPosition;
+    this.dealerPostion = dealerPosition % this.players.length;
     this.pots = [];
     this.lastAggressorOnRiver = null;
     this.minRaise = 2;
@@ -143,8 +143,8 @@ export class Game {
     const activePlayers = this.players.filter(p => p.chips > 0);
   
     // Step 1: Find dealer (player before small blind)
-    let dealerIndex = this.dealerPostion;
-  
+    let dealerIndex = this.dealerPostion % this.players.length;
+
     // Move dealer back until you find a player with chips
     while (this.players[dealerIndex].chips === 0) {
       dealerIndex = (dealerIndex - 1 + this.players.length) % this.players.length;

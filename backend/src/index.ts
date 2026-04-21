@@ -286,7 +286,7 @@ async function main() {
             const gameFull = session.players.length >= 7;
             
             if (!existingPlayer && !existingWaiting) {
-              const newPlayer = new Player(data.name);
+              const newPlayer = new Player(data.name, session.startingChips);
               
               if (gameInProgress || gameFull) {
                 session.waitingPlayers.push(newPlayer);
