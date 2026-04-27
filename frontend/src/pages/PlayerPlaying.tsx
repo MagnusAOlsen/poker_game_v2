@@ -9,6 +9,7 @@ import LanguageButton from "../components/LanguageButton";
 import handRanking from "../assets/hand_ranking.png";
 import GetMoreChips from "../components/getMoreChips";
 import LeaveGame from "../components/leaveGame";
+import { getWsUrl } from "../wsUrl";
 
 function PlayerPlaying() {
   const socketRef = useRef<WebSocket | null>(null);
@@ -36,9 +37,7 @@ function PlayerPlaying() {
     !isMyTurnMessage && myPlayer !== null && !isRaiseActive && !showFoldedCards;
 
   useEffect(() => {
-    const socket = new WebSocket(
-      import.meta.env.VITE_WS_URL || "ws://localhost:3000"
-    );
+    const socket = new WebSocket(getWsUrl());
     socketRef.current = socket;
 
     socket.onopen = () => {

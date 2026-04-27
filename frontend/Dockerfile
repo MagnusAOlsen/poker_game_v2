@@ -1,7 +1,5 @@
 FROM node:22-alpine AS builder
 WORKDIR /app
-ARG VITE_WS_URL=ws://localhost:3000
-ENV VITE_WS_URL=$VITE_WS_URL
 COPY package*.json ./
 RUN npm ci
 COPY . .

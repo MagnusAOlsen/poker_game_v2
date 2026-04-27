@@ -208,7 +208,7 @@ async function main() {
     res.writeHead(200, { "Content-Type": "text/plain" });
     res.end("Poker backend is running");
   });
-  const wss = new WebSocketServer({ server });
+  const wss = new WebSocketServer({ server, path: '/socket' });
   await connectDB();
   const sessions = new Map<string, Session>();
   const socketToGameCode = new Map<WebSocket, string>();

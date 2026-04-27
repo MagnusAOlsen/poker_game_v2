@@ -23,30 +23,42 @@ There are no tests in this project.
 
 ## Docker
 
-```bash
-# Build and start both containers
-docker compose up --build
+This project is designed to sit behind a shared Caddy reverse proxy (see `multi-compose-caddy-setup.md`). Neither container publishes ports — both join an external `web` network where Caddy reaches them by container name (`poker_backend:3000`, `poker_frontend:80`).
 
-# Run in background
+```bash
+# Create the shared network once (host-level, before first run)
+docker network create web
+
+# Production (server, behind Caddy — no published ports)
 docker compose up --build -d
+
+# Local testing without Caddy — publishes :80 on the host
+docker compose -f docker-compose.yml -f docker-compose.local.yml up --build -d
 
 # Stop
 docker compose down
 ```
 
-The frontend is served by nginx on port `80`. The backend WebSocket is on port `3000`. `VITE_WS_URL` is baked into the frontend at build time — to change it (e.g. for LAN play), pass the build arg:
+`nginx.conf` proxies `/socket*` to `poker_backend:3000`. In production Caddy intercepts that path first, so the nginx rule is dead code. Locally (without Caddy) it's what makes the same-origin WebSocket work.
 
-```bash
-docker compose build --build-arg VITE_WS_URL=ws://192.168.1.x:3000 frontend
+Caddyfile snippet (lives in the Caddy compose project, not here):
+
+```caddy
+poker.example.com {
+    reverse_proxy /socket* poker_backend:3000
+    reverse_proxy poker_frontend:80
+}
 ```
+
+The frontend derives the WebSocket URL at runtime from `window.location` (e.g. `wss://poker.example.com/socket`), so no build-time `VITE_WS_URL` is needed for production.
 
 ## Environment Variables
 
 **`backend/.env`** — `MONGODB_URI`, `PORT` (default `3000`), `NODE_ENV`
 
-**`frontend/.env`** — `VITE_WS_URL` (WebSocket URL, e.g. `ws://localhost:3000` for local dev or the local network IP for LAN play)
+**`frontend/.env`** — `VITE_WS_URL` (only for `npm run dev`, e.g. `ws://localhost:3000/socket`). In production builds the URL is derived from `window.location` and this var is unused.
 
-The frontend opens at `http://localhost:5173/WelcomePage` in dev. Production is deployed on Vercel (frontend) and Railway (backend).
+The frontend opens at `http://localhost:5173/WelcomePage` in dev.
 
 ## Architecture
 

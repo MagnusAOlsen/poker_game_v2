@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import type { Card } from "../types/Card";
 import MusicButton from "../components/MusicButton.tsx";
 import LanguageButton from "../components/LanguageButton.tsx";
+import { getWsUrl } from "../wsUrl";
 
 function HostPlaying() {
   const location = useLocation();
@@ -24,9 +25,7 @@ function HostPlaying() {
 
   useEffect(() => {
     sessionStorage.setItem("currentPlayers", JSON.stringify(currentPlayers));
-    const socket = new WebSocket(
-      import.meta.env.VITE_WS_URL || "ws://localhost:3000"
-    );
+    const socket = new WebSocket(getWsUrl());
     socketRef.current = socket;
     setShuffling(false);
 

@@ -1,0 +1,4 @@
+services:
+  poker_frontend:
+    ports:
+      - "80:80"

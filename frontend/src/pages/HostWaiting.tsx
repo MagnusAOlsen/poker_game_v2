@@ -7,6 +7,7 @@ import MusicButton from "../components/MusicButton";
 import type { Player } from "../types/Player";
 import LanguageButton from "../components/LanguageButton";
 import { useT } from "../i18n/translations";
+import { getWsUrl } from "../wsUrl";
 
 function HostWaiting() {
   const [currentPlayers, setCurrentPlayers] = useState<Player[]>(() => {
@@ -30,9 +31,7 @@ function HostWaiting() {
 
   useEffect(() => {
     sessionStorage.setItem("currentPlayers", JSON.stringify(currentPlayers));
-    const socket = new WebSocket(
-      import.meta.env.VITE_WS_URL || "ws://localhost:3000"
-    );
+    const socket = new WebSocket(getWsUrl());
     socketRef.current = socket;
 
     socket.onopen = () => {

@@ -1,18 +1,29 @@
 services:
-  backend:
+  poker_backend:
     build: ./backend
-    ports:
-      - "3000:3000"
-    env_file:
-      - ./backend/.env
+    container_name: poker_backend
+    restart: unless-stopped
+    expose:
+      - "3000"
+    environment:
+      NODE_ENV: production
+    networks:
+      - web
+      - internal
 
-  frontend:
-    build:
-      context: ./frontend
-      args:
-        VITE_WS_URL: ws://${LOCAL_IP}:3000
-    ports:
-      - "80:80"
+  poker_frontend:
+    build: ./frontend
+    container_name: poker_frontend
+    restart: unless-stopped
+    expose:
+      - "80"
     depends_on:
-      - backend
-    
+      - poker_backend
+    networks:
+      - web
+
+networks:
+  web:
+    external: true
+  internal:
+    driver: bridge

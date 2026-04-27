@@ -7,6 +7,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import AnimatedEllipsis from "../components/animatedEllipsis.tsx";
 import { useT } from "../i18n/translations";
 import LanguageButton from "../components/LanguageButton.tsx";
+import { getWsUrl } from "../wsUrl";
 
 function PlayerLogin() {
   const navigate = useNavigate();
@@ -63,9 +64,7 @@ function PlayerLogin() {
     sessionStorage.setItem("ready", isReady.toString());
     sessionStorage.setItem("currentPlayer", playerName);
 
-    const socket = new WebSocket(
-      import.meta.env.VITE_WS_URL || "ws://localhost:3000"
-    );
+    const socket = new WebSocket(getWsUrl());
     socketRef.current = socket;
 
     socket.onmessage = (msg) => {
