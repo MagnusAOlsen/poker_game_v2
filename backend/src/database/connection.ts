@@ -12,7 +12,7 @@ export async function connectDB() {
   }
   try {
     await mongoose.connect(MONGODB_URI, {
-      dbName: "test",
+      dbName: "production",
       serverSelectionTimeoutMS: 10000,
     });
     const host = mongoose.connection.host;
