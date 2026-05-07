@@ -53,6 +53,18 @@ export const translations = {
     gameFull: "The game is full, waiting for players to leave",
     getMoreChipsText: (n: number) => `Your chipcount will be ${n} for the next round`,
     leaveGameText: "You will leave after this round. If you are still in the hand, wait to leave until you have folded.",
+    handRanks: [
+      "High Card",
+      "One Pair",
+      "Two Pair",
+      "Three of a Kind",
+      "Straight",
+      "Flush",
+      "Full House",
+      "Four of a Kind",
+      "Straight Flush",
+      "Royal Flush",
+    ],
   },
 
   no: {
@@ -97,6 +109,18 @@ export const translations = {
     gameFull: "Spillet er fullt, venter på ledig plass i spillet",
     getMoreChipsText: (n: number) => `Din stackstørrelse vil være ${n} ved neste runde`,
     leaveGameText: "Du forlater etter denne runden. Hvis du fortsatt er med i hånden, vent til du har kastet.",
+    handRanks: [
+      "Høyt kort",
+      "Par",
+      "To par",
+      "Tress",
+      "Straight",
+      "Flush",
+      "Hus",
+      "Fire like",
+      "Straight flush",
+      "Royal flush",
+    ],
   },
 
   es: {
@@ -141,6 +165,18 @@ export const translations = {
     gameFull: "La partida está llena, esperando a que salga alguien",
     getMoreChipsText: (n: number) => `Tu stack será ${n} en la próxima ronda`,
     leaveGameText: "Abandonarás después de esta ronda. Si todavía estás en la mano, espera a retirarte.",
+    handRanks: [
+      "Carta Alta",
+      "Pareja",
+      "Doble Pareja",
+      "Trío",
+      "Escalera",
+      "Color",
+      "Full",
+      "Póker",
+      "Escalera de Color",
+      "Escalera Real",
+    ],
   },
 
   fr: {
@@ -185,6 +221,18 @@ export const translations = {
     gameFull: "La partie est pleine, en attente d'une place",
     getMoreChipsText: (n: number) => `Votre stack sera de ${n} au prochain tour`,
     leaveGameText: "Vous partirez après cette manche. Si vous êtes encore dans la main, attendez de vous coucher.",
+    handRanks: [
+      "Carte Haute",
+      "Paire",
+      "Double Paire",
+      "Brelan",
+      "Quinte",
+      "Couleur",
+      "Full",
+      "Carré",
+      "Quinte Flush",
+      "Quinte Flush Royale",
+    ],
   },
 
   it: {
@@ -229,6 +277,18 @@ export const translations = {
     gameFull: "La partita è piena, in attesa di un posto",
     getMoreChipsText: (n: number) => `Il tuo stack sarà ${n} al prossimo round`,
     leaveGameText: "Uscirai dopo questa mano. Se sei ancora nel gioco, aspetta di fare fold.",
+    handRanks: [
+      "Carta Alta",
+      "Coppia",
+      "Doppia Coppia",
+      "Tris",
+      "Scala",
+      "Colore",
+      "Full",
+      "Poker",
+      "Scala Colore",
+      "Scala Reale",
+    ],
   },
 
   cn: {
@@ -273,6 +333,18 @@ export const translations = {
     gameFull: "游戏已满，等待玩家离开",
     getMoreChipsText: (n: number) => `下一局您的筹码将为 ${n}`,
     leaveGameText: "您将在本局结束后离开。如果您仍在手牌中，请等待弃牌后再离开。",
+    handRanks: [
+      "高牌",
+      "一对",
+      "两对",
+      "三条",
+      "顺子",
+      "同花",
+      "葫芦",
+      "四条",
+      "同花顺",
+      "皇家同花顺",
+    ],
   },
 
   de: {
@@ -317,6 +389,18 @@ export const translations = {
     gameFull: "Spiel voll, warten auf freien Platz",
     getMoreChipsText: (n: number) => `Dein Stack wird in der nächsten Runde ${n} sein`,
     leaveGameText: "Du verlässt nach dieser Runde. Wenn du noch im Spiel bist, warte bis du gepasst hast.",
+    handRanks: [
+      "Höchste Karte",
+      "Paar",
+      "Zwei Paare",
+      "Drilling",
+      "Straße",
+      "Flush",
+      "Full House",
+      "Vierling",
+      "Straight Flush",
+      "Royal Flush",
+    ],
   },
 
   jp: {
@@ -361,6 +445,18 @@ export const translations = {
     gameFull: "ゲームは満員です。プレイヤーが抜けるのを待っています",
     getMoreChipsText: (n: number) => `次のラウンドのチップ数は ${n} になります`,
     leaveGameText: "このラウンド終了後に退出します。まだハンドに参加している場合は、フォールドしてから退出してください。",
+    handRanks: [
+      "ハイカード",
+      "ワンペア",
+      "ツーペア",
+      "スリーカード",
+      "ストレート",
+      "フラッシュ",
+      "フルハウス",
+      "フォーカード",
+      "ストレートフラッシュ",
+      "ロイヤルストレートフラッシュ",
+    ],
   },
 } as const;
 

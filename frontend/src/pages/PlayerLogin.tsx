@@ -121,10 +121,6 @@ function PlayerLogin() {
 
   return (
     <div className="player-login-container">
-      <div className="aces-wrapper">
-        <Aces />
-      </div>
-
       <div className="languageButton">
         <LanguageButton variant="player" />
       </div>
@@ -135,9 +131,7 @@ function PlayerLogin() {
         </div>
       ) : (
         <div className="player-ready-wrapper">
-          <h2 className="player-ready-title">
-            {t.readyToPlay(playerName)}
-          </h2>
+          <h2 className="player-ready-title">{t.readyToPlay(playerName)}</h2>
 
           {avatar === "" ? (
             <div>
@@ -186,6 +180,9 @@ function PlayerLogin() {
           )}
         </div>
       )}
+      <div className="aces-wrapper">
+        <Aces />
+      </div>
     </div>
   );
 }

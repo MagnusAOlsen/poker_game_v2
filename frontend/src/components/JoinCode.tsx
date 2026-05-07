@@ -10,7 +10,7 @@ function JoinCode() {
     <div
       style={{
         display: "flex",
-        flexDirection: "column" /* Stacks text above input group */,
+        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         height: "35vh",

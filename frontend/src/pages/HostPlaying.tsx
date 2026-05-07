@@ -6,6 +6,9 @@ import { useState, useEffect, useRef } from "react";
 import type { Card } from "../types/Card";
 import MusicButton from "../components/MusicButton.tsx";
 import LanguageButton from "../components/LanguageButton.tsx";
+import ShowdownResults, {
+  type ShowdownResult,
+} from "../components/ShowdownResults";
 import { getWsUrl } from "../wsUrl";
 
 function HostPlaying() {
@@ -23,6 +26,9 @@ function HostPlaying() {
   });
   const [shuffling, setShuffling] = useState<boolean>(false);
   const [currentTurnName, setCurrentTurnName] = useState<string | null>(null);
+  const [showdownResults, setShowdownResults] = useState<ShowdownResult[] | null>(
+    null
+  );
 
   useEffect(() => {
     sessionStorage.setItem("currentPlayers", JSON.stringify(currentPlayers));
@@ -50,8 +56,11 @@ function HostPlaying() {
         sessionStorage.setItem("potSize", JSON.stringify(data.potSize || 0));
       } else if (data.type === "shuffling") {
         setShuffling(true);
+        setShowdownResults(null);
       } else if (data.type === "currentTurn") {
         setCurrentTurnName(data.name ?? null);
+      } else if (data.type === "showdownResults") {
+        setShowdownResults(data.results as ShowdownResult[]);
       } else if (data.type === "players") {
         setShuffling(false);
         setCurrentPlayers(data.players);
@@ -77,6 +86,9 @@ function HostPlaying() {
         gameCode={sessionStorage.getItem("gameCode") || ""}
         currentTurnName={currentTurnName}
       />
+      {showdownResults && showdownResults.length > 0 && (
+        <ShowdownResults results={showdownResults} />
+      )}
       <div
         style={{
           position: "absolute",

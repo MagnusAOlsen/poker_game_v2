@@ -4,6 +4,7 @@ import { WebSocketServer, WebSocket } from 'ws';
 import http from 'http';
 import { Player } from "./gameLogic/Player.js";
 import { Game } from "./gameLogic/Game.js";
+import { HandEvaluator } from "./gameLogic/HandEvaluator.js";
 import ip from 'ip';
 
 interface Session {
@@ -188,7 +189,27 @@ async function playRound(session: Session, dealerPosition: number) {
 
   await game.collectShowdownChoices();
   game.payOut(rankings)
-  broadcast(session, { type: 'players', players: game.players });  
+  broadcast(session, { type: 'players', players: game.players });
+
+  const revealed = rankings.filter(r => r.player.showBothCards).slice(0, 6);
+  if (revealed.length > 0) {
+    let place = 0;
+    let prevHand: typeof revealed[number]['hand'] | null = null;
+    const results = revealed.map((entry, i) => {
+      if (prevHand === null || HandEvaluator.compareHands(entry.hand, prevHand) !== 0) {
+        place = i + 1;
+      }
+      prevHand = entry.hand;
+      return {
+        name: entry.player.name,
+        cards: entry.hand.cards,
+        handRank: entry.hand.rank,
+        place,
+      };
+    });
+    broadcast(session, { type: 'showdownResults', results });
+  }
+
   for (const name of session.turnReminders.keys()) {
     clearTurnReminder(session, name);
   }
@@ -376,7 +397,7 @@ async function main() {
                 session.game = game;
                 await playRound(session, dealerPosition);
             
-                await new Promise(resolve => setTimeout(resolve, 7500));
+                await new Promise(resolve => setTimeout(resolve, 12000));
 
                 
 

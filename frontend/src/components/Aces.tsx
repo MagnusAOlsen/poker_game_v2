@@ -7,9 +7,9 @@ function Aces() {
       <img
         src={aces}
         style={{
-          position: "absolute",
-          maxWidth: "80%",
-          overflow: "hidden",
+          maxWidth: "100%",
+          maxHeight: "60vh",
+          objectFit: "contain",
         }}
       />
     </div>

@@ -1,0 +1,54 @@
+.showdown-results-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  background-color: rgba(0, 0, 0, 0.55);
+}
+
+.showdown-results-box {
+  background-color: rgba(20, 20, 20, 0.95);
+  border: 2px solid #ffd700;
+  border-radius: 12px;
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 1100vw;
+  max-height: 1050vh;
+  overflow: auto;
+}
+
+.showdown-row {
+  display: grid;
+  grid-template-columns: 80px auto 1fr;
+  align-items: center;
+  gap: 24px;
+}
+
+.showdown-place {
+  color: #ffd700;
+  font-size: 32px;
+  font-weight: bold;
+  font-family: monospace;
+  text-align: right;
+}
+
+.showdown-cards {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+}
+
+.showdown-card {
+  width: 90px;
+}
+
+.showdown-name {
+  color: white;
+  font-size: 35px;
+  font-weight: bold;
+  white-space: nowrap;
+}
