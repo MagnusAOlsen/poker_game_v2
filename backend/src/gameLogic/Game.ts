@@ -62,7 +62,17 @@ export class Game {
     let lastBet: number;
     let playersWhoActed = new Set<Player>();
     const dealer = this.players[this.dealerPostion];
-    const dealerIndexInActive = activePlayers.indexOf(dealer);
+    let dealerIndexInActive = activePlayers.indexOf(dealer);
+    if (dealerIndexInActive === -1) {
+      for (let i = 1; i <= this.players.length; i++) {
+        const candidate = (this.dealerPostion - i + this.players.length) % this.players.length;
+        const idx = activePlayers.indexOf(this.players[candidate]);
+        if (idx !== -1) {
+          dealerIndexInActive = idx;
+          break;
+        }
+      }
+    }
 
     if (this.phase === 'pre-flop') {
       currentPlayerIndex = (dealerIndexInActive + 3) % activePlayers.length; // Start after big blind

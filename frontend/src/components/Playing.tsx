@@ -46,7 +46,7 @@ function Playing({
       x -= 140;
       y -= 40;
     } else {
-      x -= 20;
+      x -= 38;
       y += 20;
     }
     seatPositions.push({ x, y });

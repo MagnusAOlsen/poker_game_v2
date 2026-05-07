@@ -42,6 +42,7 @@ function PlayerOnBoard({ x, y, player, isCurrentTurn }: PlayerProps) {
               color: "rgb(229, 6, 6)",
               fontSize: "50px",
               fontWeight: "bold",
+              transform: "translate(50px, -10px)",
             }}
           >
             Fold
