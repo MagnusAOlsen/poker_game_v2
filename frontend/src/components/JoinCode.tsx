@@ -40,6 +40,7 @@ function JoinCode() {
           placeholder={t.joinCodePlaceholder}
           value={code}
           onChange={(e) => setCode(e.target.value)}
+          maxLength={6}
           style={{
             padding: "10px",
             fontSize: "16px",

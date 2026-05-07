@@ -46,6 +46,7 @@ function UserNameField({ onSubmit }: UserNameFieldProps) {
           value={newPlayer}
           onChange={(e) => setNewPlayer(e.target.value)}
           placeholder="Your name"
+          maxLength={6}
           autoFocus
           style={{
             padding: "12px 16px",

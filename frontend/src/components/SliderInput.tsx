@@ -22,9 +22,14 @@ function SliderInput({
   const [value, setValue] = useState<number>(
     initialValue !== undefined ? initialValue : 0
   );
+  const [manualStr, setManualStr] = useState<string>(
+    initialValue !== undefined ? String(initialValue) : "0"
+  );
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setValue(Number(event.target.value));
+    const newValue = Number(event.target.value);
+    setValue(newValue);
+    setManualStr(String(newValue));
   };
 
   const handleConfirm = () => {
@@ -64,10 +69,17 @@ function SliderInput({
         type="number"
         min={min}
         max={max}
-        value={value}
+        value={manualStr}
+        onFocus={() => setManualStr("")}
+        onBlur={() => {
+          if (manualStr === "") setManualStr(String(value));
+        }}
         onChange={(e) => {
-          const newValue = Number(e.target.value);
-          setValue(newValue);
+          setManualStr(e.target.value);
+          if (e.target.value !== "") {
+            const newValue = Number(e.target.value);
+            if (!isNaN(newValue)) setValue(newValue);
+          }
         }}
         style={{
           width: "100%",
