@@ -13,6 +13,7 @@ type PlayingProps = {
   potSize: number;
   shuffling: boolean;
   gameCode: string;
+  currentTurnName?: string | null;
 };
 
 function Playing({
@@ -21,6 +22,7 @@ function Playing({
   potSize,
   shuffling,
   gameCode,
+  currentTurnName,
 }: PlayingProps) {
   const centerX = 800;
   const centerY = 440;
@@ -68,7 +70,15 @@ function Playing({
 
   const players = playersPlaying.map((player, i) => {
     const { x, y } = seatPositions[i];
-    return <PlayerOnBoard key={i} x={x} y={y} player={player} />;
+    return (
+      <PlayerOnBoard
+        key={i}
+        x={x}
+        y={y}
+        player={player}
+        isCurrentTurn={!!currentTurnName && player.name === currentTurnName}
+      />
+    );
   });
 
   const getCardImage = (card: Card): string => {

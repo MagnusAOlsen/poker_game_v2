@@ -10,6 +10,7 @@ type PlayerProps = {
   x: number;
   y: number;
   player: Player;
+  isCurrentTurn?: boolean;
 };
 
 const getCardImage = (card: Card): string => {
@@ -20,7 +21,7 @@ const getAvatar = (player: Player): string => {
   return `../avatars/${player.avatar}.png`;
 };
 
-function PlayerOnBoard({ x, y, player }: PlayerProps) {
+function PlayerOnBoard({ x, y, player, isCurrentTurn }: PlayerProps) {
   return (
     <div className="player" style={{ left: `${x}px`, top: `${y}px` }}>
       {player.currentBet > 0 && (
@@ -99,7 +100,9 @@ function PlayerOnBoard({ x, y, player }: PlayerProps) {
       <div className="player-details">
         <div className="user-name">
           <img src={getAvatar(player)} alt="Avatar" />
-          <h2>{player.name}</h2>
+          <h2 className={isCurrentTurn ? "active-turn-name" : ""}>
+            {player.name}
+          </h2>
           {player.isSmallBlind && <h2 className="blind-label">SB</h2>}
           {player.isBigBlind && <h2 className="blind-label">BB</h2>}
           {player.isDealer && (

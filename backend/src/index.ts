@@ -120,6 +120,7 @@ async function playRound(session: Session, dealerPosition: number) {
 
   for (const player of game.players) {
     player.notifyTurn = (activePlayerName) => {
+      broadcast(session, { type: 'currentTurn', name: activePlayerName });
       startTurnReminder(
         session,
         activePlayerName,
@@ -128,7 +129,7 @@ async function playRound(session: Session, dealerPosition: number) {
           const minRaise = activePlayer
             ? activePlayer.currentBet + game.callingAmount + game.minRaise
             : game.callingAmount + game.minRaise;
-  
+
           return {
             type: 'yourTurn',
             minRaise
@@ -141,6 +142,7 @@ async function playRound(session: Session, dealerPosition: number) {
 
   for (let i = 0; i < 4; i++) {
     await game.collectBets();
+    broadcast(session, { type: 'currentTurn', name: null });
     broadcast(session, { type: "players", players: game.players });
     game.nextPhase();
     game.players.forEach(p => {

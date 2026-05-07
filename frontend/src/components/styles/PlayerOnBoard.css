@@ -83,6 +83,12 @@
   margin-right: 5px;
 }
 
+.user-name h2.active-turn-name {
+  color: #ffd700;
+  font-size: 2rem;
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.6);
+}
+
 .blind-label {
   color: black;
   margin-left: 10px;

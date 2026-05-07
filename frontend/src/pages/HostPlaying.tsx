@@ -22,6 +22,7 @@ function HostPlaying() {
     return JSON.parse(sessionStorage.getItem("potSize") || "0") as number;
   });
   const [shuffling, setShuffling] = useState<boolean>(false);
+  const [currentTurnName, setCurrentTurnName] = useState<string | null>(null);
 
   useEffect(() => {
     sessionStorage.setItem("currentPlayers", JSON.stringify(currentPlayers));
@@ -49,6 +50,8 @@ function HostPlaying() {
         sessionStorage.setItem("potSize", JSON.stringify(data.potSize || 0));
       } else if (data.type === "shuffling") {
         setShuffling(true);
+      } else if (data.type === "currentTurn") {
+        setCurrentTurnName(data.name ?? null);
       } else if (data.type === "players") {
         setShuffling(false);
         setCurrentPlayers(data.players);
@@ -72,6 +75,7 @@ function HostPlaying() {
         potSize={potSize}
         shuffling={shuffling}
         gameCode={sessionStorage.getItem("gameCode") || ""}
+        currentTurnName={currentTurnName}
       />
       <div
         style={{
