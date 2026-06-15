@@ -98,7 +98,7 @@ function startShowdownReminder(
   session.showdownReminders.set(playerName, timer);
 }
 
-async function playRound(session: Session, dealerPosition: number) {
+async function playRound(session: Session, dealerPosition: number): Promise<boolean> {
   const game = session.game;
   broadcast(session, { type: 'shuffling'});
   await new Promise(resolve => setTimeout(resolve, 2000));
@@ -216,8 +216,11 @@ async function playRound(session: Session, dealerPosition: number) {
   for (const name of session.showdownReminders.keys()) {
     clearShowdownReminder(session, name);
   }
-    
-}};
+
+  return revealed.length > 0;
+  }
+  return false;
+};
   
 
 async function main() {
@@ -395,9 +398,9 @@ async function main() {
                 
                 const game = new Game(session.players);
                 session.game = game;
-                await playRound(session, dealerPosition);
-            
-                await new Promise(resolve => setTimeout(resolve, 12000));
+                const hadShowdown = await playRound(session, dealerPosition);
+
+                await new Promise(resolve => setTimeout(resolve, hadShowdown ? 12000 : 4000));
 
                 
 
