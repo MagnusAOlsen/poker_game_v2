@@ -94,4 +94,36 @@
   .waiting-text {
     font-size: 1.2rem;
   }
-  
+
+  .info-box-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 100;
+  }
+
+  .info-box {
+    background-color: #0a1a2f;
+    border: solid 2px #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 400px;
+    width: 100%;
+    color: white;
+    text-align: center;
+    box-sizing: border-box;
+  }
+
+  .info-box p {
+    font-size: 1.1rem;
+    line-height: 1.4;
+    margin-bottom: 16px;
+  }
+
+  .info-box-buttons {
+    margin-top: 20px;
+  }

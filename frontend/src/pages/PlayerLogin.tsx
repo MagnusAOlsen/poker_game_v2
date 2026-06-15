@@ -46,6 +46,7 @@ function PlayerLogin() {
     return storedAvatar || `../avatars/${listOfAvatars.at(currentIndex)}.png`;
   });
   const [waitingMessage, setWaitingMessage] = useState(false);
+  const [showInfoBox, setShowInfoBox] = useState(false);
 
   const socketRef = useRef<WebSocket | null>(null);
 
@@ -87,6 +88,7 @@ function PlayerLogin() {
     setPlayerName(name);
     sessionStorage.setItem("ready", "true");
     setIsReady(true);
+    setShowInfoBox(true);
     socketRef.current.send(
       JSON.stringify({ type: "join", name, gameCode: gameCode })
     );
@@ -121,6 +123,36 @@ function PlayerLogin() {
 
   return (
     <div className="player-login-container">
+      {showInfoBox && (
+        <div className="info-box-overlay">
+          <div className="info-box">
+            <p>
+              You must have the game open in your browser when the host starts
+              the game or when you are dealt a new card for the next round.
+              Otherwise, the game will pause or stop.
+            </p>
+            <p>
+              While waiting for your turn, you can use your phone freely. Just
+              refresh the browser when you return to the game.
+            </p>
+            <div className="info-box-buttons">
+              <button
+                onClick={() => setShowInfoBox(false)}
+                className="action-button"
+              >
+                Understood
+              </button>
+              <button
+                onClick={() => setShowInfoBox(false)}
+                className="fold-leave-button"
+              >
+                Understood, but in red
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="languageButton">
         <LanguageButton variant="player" />
       </div>
