@@ -26,6 +26,7 @@ function PlayerPlaying() {
   const [startStack, setStartStack] = useState(150);
   const [showGetMoreChips, setShowGetMoreChips] = useState(false);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const [pendingShowChoice, setPendingShowChoice] = useState<string | null>(null);
 
   const canAct =
     isMyTurnMessage &&
@@ -101,6 +102,17 @@ function PlayerPlaying() {
       socketRef.current.send(JSON.stringify({ type: action }));
     }
     setShowFoldedCards(false);
+  };
+
+  // At showdown, if the player is not the last one standing and chooses
+  // anything other than showing both cards, they get mucked (folded) and
+  // forfeit the hand — so confirm before sending.
+  const handleShowChoice = (action: string) => {
+    if (action === "showBothCards" || isLastStanding) {
+      sendShownCards(action);
+    } else {
+      setPendingShowChoice(action);
+    }
   };
 
   const getCardImage = (card: Card): string => {
@@ -217,6 +229,18 @@ function PlayerPlaying() {
           onCancel={() => setShowLeaveConfirm(false)}
         />
       )}
+      {pendingShowChoice && (
+        <LeaveGame
+          text={t.confirmShowFewerText}
+          confirmLabel={t.confirmShowFewerYes}
+          cancelLabel={t.cancel}
+          onConfirm={() => {
+            sendShownCards(pendingShowChoice);
+            setPendingShowChoice(null);
+          }}
+          onCancel={() => setPendingShowChoice(null)}
+        />
+      )}
       {!isRaiseActive && (
         <div className="info-button">
           <button
@@ -231,26 +255,26 @@ function PlayerPlaying() {
       {showFoldedCards && (
         <div className="folded-cards-buttons">
           <button
-            onClick={() => sendShownCards("showBothCards")}
+            onClick={() => handleShowChoice("showBothCards")}
             className="action-button"
           >
             {t.showBothCards}
           </button>
           <button
-            onClick={() => sendShownCards("showLeftCard")}
+            onClick={() => handleShowChoice("showLeftCard")}
             className={isLastStanding ? "action-button" : "fold-leave-button"}
           >
             {t.showLeftCard}
           </button>
           <button
-            onClick={() => sendShownCards("showRightCard")}
+            onClick={() => handleShowChoice("showRightCard")}
             className={isLastStanding ? "action-button" : "fold-leave-button"}
           >
             {t.showRightCard}
           </button>
 
           <button
-            onClick={() => sendShownCards("showNone")}
+            onClick={() => handleShowChoice("showNone")}
             className={isLastStanding ? "action-button" : "fold-leave-button"}
           >
             {t.showNone}

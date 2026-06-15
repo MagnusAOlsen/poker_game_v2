@@ -126,27 +126,20 @@ function PlayerLogin() {
       {showInfoBox && (
         <div className="info-box-overlay">
           <div className="info-box">
-            <p>
-              You must have the game open in your browser when the host starts
-              the game or when you are dealt a new card for the next round.
-              Otherwise, the game will pause or stop.
-            </p>
-            <p>
-              While waiting for your turn, you can use your phone freely. Just
-              refresh the browser when you return to the game.
-            </p>
+            <p>{t.presenceWarningP1}</p>
+            <p>{t.presenceWarningP2}</p>
             <div className="info-box-buttons">
               <button
                 onClick={() => setShowInfoBox(false)}
                 className="action-button"
               >
-                Understood
+                {t.understood}
               </button>
               <button
                 onClick={() => setShowInfoBox(false)}
                 className="fold-leave-button"
               >
-                Understood, but in red
+                {t.understoodRed}
               </button>
             </div>
           </div>
